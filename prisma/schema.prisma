@@ -1,0 +1,193 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+}
+
+enum Role {
+  STUDENT
+  OWNER
+  ADMIN
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+  REFUNDED
+}
+
+enum RoomType {
+  SINGLE
+  DOUBLE
+  TRIPLE
+  DORMITORY
+  STUDIO
+  APARTMENT
+}
+
+enum BookingType {
+  DAILY
+  MONTHLY
+}
+
+enum PropertyStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  INACTIVE
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  password      String
+  phone         String?
+  avatar        String?
+  role          Role      @default(STUDENT)
+  isVerified    Boolean   @default(false)
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  rooms         Room[]
+  bookings      Booking[]
+  reviews       Review[]
+  wishlist      Wishlist[]
+  notifications Notification[]
+
+  @@map("users")
+}
+
+model Room {
+  id            String         @id @default(cuid())
+  title         String
+  description   String
+  address       String
+  city          String
+  state         String
+  zipCode       String?
+  latitude      Float?
+  longitude     Float?
+  priceDaily    Float
+  priceMonthly  Float
+  roomType      RoomType       @default(SINGLE)
+  status        PropertyStatus @default(PENDING)
+  maxOccupancy  Int            @default(1)
+  totalRooms    Int            @default(1)
+  availableRooms Int           @default(1)
+  images        String[]
+  amenities     String[]
+  rules         String[]
+  rating        Float          @default(0)
+  reviewCount   Int            @default(0)
+  isAvailable   Boolean        @default(true)
+  ownerId       String
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  // Relations
+  owner         User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  bookings      Booking[]
+  reviews       Review[]
+  wishlist      Wishlist[]
+
+  @@map("rooms")
+}
+
+model Booking {
+  id            String        @id @default(cuid())
+  roomId        String
+  studentId     String
+  bookingType   BookingType
+  checkIn       DateTime
+  checkOut      DateTime
+  totalDays     Int
+  totalAmount   Float
+  status        BookingStatus @default(PENDING)
+  specialNote   String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  // Relations
+  room          Room          @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  student       User          @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  payment       Payment?
+
+  @@map("bookings")
+}
+
+model Payment {
+  id                String        @id @default(cuid())
+  bookingId         String        @unique
+  amount            Float
+  currency          String        @default("usd")
+  status            PaymentStatus @default(PENDING)
+  stripePaymentId   String?
+  stripeSessionId   String?
+  refundId          String?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  // Relations
+  booking           Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@map("payments")
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  roomId    String
+  userId    String
+  rating    Int      @default(5)
+  comment   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([roomId, userId])
+  @@map("reviews")
+}
+
+model Wishlist {
+  id        String   @id @default(cuid())
+  userId    String
+  roomId    String
+  createdAt DateTime @default(now())
+
+  // Relations
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, roomId])
+  @@map("wishlists")
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  message   String
+  isRead    Boolean  @default(false)
+  type      String   @default("info")
+  createdAt DateTime @default(now())
+
+  // Relations
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
