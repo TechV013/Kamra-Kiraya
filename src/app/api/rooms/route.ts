@@ -1,11 +1,15 @@
 import { NextRequest } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { requireRole, apiError, apiResponse } from "@/lib/api-helpers";
 
-// GET /api/rooms - list rooms with filters
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
+
 export async function GET(req: NextRequest) {
   try {
+    const { prisma } = await import("@/lib/prisma"); // ✅ lazy import
+
     const { searchParams } = new URL(req.url);
+
     const city = searchParams.get("city");
     const minPrice = searchParams.get("minPrice");
     const maxPrice = searchParams.get("maxPrice");
@@ -17,16 +21,17 @@ export async function GET(req: NextRequest) {
     const sortBy = searchParams.get("sortBy") || "createdAt";
 
     const skip = (page - 1) * limit;
+    const priceField =
+      bookingType === "DAILY" ? "priceDaily" : "priceMonthly";
 
-    const priceField = bookingType === "DAILY" ? "priceDaily" : "priceMonthly";
-
-    const where: Record<string, unknown> = {
+    const where: Record<string, any> = {
       status: "APPROVED",
       isAvailable: true,
     };
 
     if (city) where.city = { contains: city, mode: "insensitive" };
     if (roomType) where.roomType = roomType;
+
     if (search) {
       where.OR = [
         { title: { contains: search, mode: "insensitive" } },
@@ -35,6 +40,7 @@ export async function GET(req: NextRequest) {
         { address: { contains: search, mode: "insensitive" } },
       ];
     }
+
     if (minPrice || maxPrice) {
       where[priceField] = {
         ...(minPrice ? { gte: parseFloat(minPrice) } : {}),
@@ -42,7 +48,7 @@ export async function GET(req: NextRequest) {
       };
     }
 
-    const orderBy: Record<string, string> =
+    const orderBy =
       sortBy === "price"
         ? { [priceField]: "asc" }
         : sortBy === "rating"
@@ -78,13 +84,20 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// POST /api/rooms - create room (owner only)
+// POST
 export async function POST(req: NextRequest) {
-  const { error, user } = requireRole(req, ["OWNER", "ADMIN"]);
-  if (error) return error;
-
   try {
+    const { prisma } = await import("@/lib/prisma"); // ✅ lazy import
+
+    const { error, user } = requireRole(req, ["OWNER", "ADMIN"]);
+    if (error) return error;
+
+    if (!user?.userId) {
+      return apiError("Unauthorized", 401);
+    }
+
     const body = await req.json();
+
     const {
       title,
       description,
@@ -104,8 +117,16 @@ export async function POST(req: NextRequest) {
       rules,
     } = body;
 
-    if (!title || !description || !address || !city || !state || !priceDaily || !priceMonthly) {
-      return apiError("Required fields missing");
+    if (
+      !title ||
+      !description ||
+      !address ||
+      !city ||
+      !state ||
+      !priceDaily ||
+      !priceMonthly
+    ) {
+      return apiError("Required fields missing", 400);
     }
 
     const room = await prisma.room.create({
@@ -127,7 +148,7 @@ export async function POST(req: NextRequest) {
         images: images || [],
         amenities: amenities || [],
         rules: rules || [],
-        ownerId: user!.userId,
+        ownerId: user.userId,
         status: "PENDING",
       },
       include: {
