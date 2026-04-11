@@ -5,46 +5,50 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 export const revalidate = 0;
 
+// ✅ SAFE GET
 export async function GET(
   req: NextRequest,
-  context: { params: { id: string } }
+  context: any
 ) {
   try {
-    // ✅ Lazy load Prisma (CRITICAL)
-    const { prisma } = await import("@/lib/prisma");
-
-    const id = context?.params?.id;
-
-    if (!id) {
-      return apiError("Room ID is required", 400);
+    // 🛑 Prevent crash during build
+    if (!context || !context.params) {
+      return apiError("Invalid request", 400);
     }
+
+    const id = context.params.id;
+    if (!id) return apiError("Room ID required", 400);
+
+    // ✅ Lazy import INSIDE function
+    const { prisma } = await import("@/lib/prisma");
 
     const room = await prisma.room.findUnique({
       where: { id },
     });
 
-    if (!room) {
-      return apiError("Room not found", 404);
-    }
-
     return apiResponse(room);
   } catch (err) {
-    console.error("GET room error:", err);
+    console.error("GET ERROR:", err);
     return apiError("Internal server error", 500);
   }
 }
 
+// ✅ SAFE PUT
 export async function PUT(
   req: NextRequest,
-  context: { params: { id: string } }
+  context: any
 ) {
   try {
-    const { prisma } = await import("@/lib/prisma");
+    if (!context || !context.params) {
+      return apiError("Invalid request", 400);
+    }
 
-    const id = context?.params?.id;
-    if (!id) return apiError("Room ID is required", 400);
+    const id = context.params.id;
+    if (!id) return apiError("Room ID required", 400);
 
     const body = await req.json();
+
+    const { prisma } = await import("@/lib/prisma");
 
     const updated = await prisma.room.update({
       where: { id },
@@ -53,28 +57,33 @@ export async function PUT(
 
     return apiResponse(updated);
   } catch (err) {
-    console.error("PUT room error:", err);
+    console.error("PUT ERROR:", err);
     return apiError("Internal server error", 500);
   }
 }
 
+// ✅ SAFE DELETE
 export async function DELETE(
   req: NextRequest,
-  context: { params: { id: string } }
+  context: any
 ) {
   try {
-    const { prisma } = await import("@/lib/prisma");
+    if (!context || !context.params) {
+      return apiError("Invalid request", 400);
+    }
 
-    const id = context?.params?.id;
-    if (!id) return apiError("Room ID is required", 400);
+    const id = context.params.id;
+    if (!id) return apiError("Room ID required", 400);
+
+    const { prisma } = await import("@/lib/prisma");
 
     await prisma.room.delete({
       where: { id },
     });
 
-    return apiResponse({ message: "Room deleted" });
+    return apiResponse({ message: "Deleted successfully" });
   } catch (err) {
-    console.error("DELETE room error:", err);
+    console.error("DELETE ERROR:", err);
     return apiError("Internal server error", 500);
   }
 }
