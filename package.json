@@ -4,12 +4,13 @@
   "private": true,
   "packageManager": "npm@10",
   "engines": {
-    "node": "18.x"
+    "node": "24.x"
   },
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && next build",
     "start": "next start",
+    "lint": "eslint",
     "postinstall": "prisma generate"
   },
   "dependencies": {

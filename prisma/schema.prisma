@@ -3,8 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 enum Role {
@@ -16,7 +16,6 @@ enum Role {
 enum BookingStatus {
   PENDING
   CONFIRMED
-  REJECTED
   CANCELLED
   COMPLETED
 }
@@ -62,7 +61,6 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  // Relations
   rooms         Room[]
   bookings      Booking[]
   reviews       Review[]
@@ -73,81 +71,74 @@ model User {
 }
 
 model Room {
-  id            String         @id @default(cuid())
-  title         String
-  description   String
-  address       String
-  city          String
-  state         String
-  zipCode       String?
-  latitude      Float?
-  longitude     Float?
-  priceDaily    Float
-  priceMonthly  Float
-  roomType      RoomType       @default(SINGLE)
-  status        PropertyStatus @default(PENDING)
-  maxOccupancy  Int            @default(1)
-  totalRooms    Int            @default(1)
-  availableRooms Int           @default(1)
-  images        String[]
-  amenities     String[]
-  rules         String[]
-  rating        Float          @default(0)
-  reviewCount   Int            @default(0)
-  isAvailable   Boolean        @default(true)
-  ownerId       String
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  id             String         @id @default(cuid())
+  title          String
+  description    String
+  address        String
+  city           String
+  state          String
+  zipCode        String?
+  latitude       Float?
+  longitude      Float?
+  priceDaily     Float
+  priceMonthly   Float
+  roomType       RoomType       @default(SINGLE)
+  status         PropertyStatus @default(PENDING)
+  maxOccupancy   Int            @default(1)
+  totalRooms     Int            @default(1)
+  availableRooms Int            @default(1)
+  images         String[]
+  amenities      String[]
+  rules          String[]
+  rating         Float          @default(0)
+  reviewCount    Int            @default(0)
+  isAvailable    Boolean        @default(true)
+  ownerId        String
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
 
-  // Relations
-  owner         User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  bookings      Booking[]
-  reviews       Review[]
-  wishlist      Wishlist[]
+  owner          User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  bookings       Booking[]
+  reviews        Review[]
+  wishlist       Wishlist[]
 
   @@map("rooms")
 }
 
 model Booking {
-  id            String        @id @default(cuid())
-  roomId        String
-  studentId     String
-  bookingType   BookingType
-  checkIn       DateTime
-  checkOut      DateTime
-  totalDays     Int
-  totalAmount   Float
-  status        BookingStatus @default(PENDING)
-  specialNote   String?
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  id          String        @id @default(cuid())
+  roomId      String
+  studentId   String
+  bookingType BookingType
+  checkIn     DateTime
+  checkOut    DateTime
+  totalDays   Int
+  totalAmount Float
+  status      BookingStatus @default(PENDING)
+  specialNote String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 
-  // Relations
-  room          Room          @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  student       User          @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  payment       Payment?
+  room        Room          @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  student     User          @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  payment     Payment?
 
   @@map("bookings")
 }
 
 model Payment {
-  id                String        @id @default(cuid())
-  bookingId         String        @unique
-  amount            Float
-  currency          String        @default("INR")
-  status            PaymentStatus @default(PENDING)
-  transactionRef    String?
-  paymentReference  String?
-  razorpayOrderId   String?
-  razorpayPaymentId String?
-  stripePaymentId   String?
-  stripeSessionId   String?
-  refundId          String?
-  createdAt         DateTime      @default(now())
-  updatedAt         DateTime      @updatedAt
+  id              String        @id @default(cuid())
+  bookingId       String        @unique
+  amount          Float
+  currency        String        @default("usd")
+  status          PaymentStatus @default(PENDING)
+  stripePaymentId String?
+  stripeSessionId String?
+  refundId        String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 
-  // Relations
-  booking           Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  booking         Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
 
   @@map("payments")
 }
@@ -161,7 +152,6 @@ model Review {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Relations
   room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -175,7 +165,6 @@ model Wishlist {
   roomId    String
   createdAt DateTime @default(now())
 
-  // Relations
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
 
@@ -192,7 +181,6 @@ model Notification {
   type      String   @default("info")
   createdAt DateTime @default(now())
 
-  // Relations
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("notifications")
