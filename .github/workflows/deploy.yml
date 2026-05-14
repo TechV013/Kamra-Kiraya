@@ -9,6 +9,9 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -23,8 +26,9 @@ jobs:
 
       - name: Generate Prisma Client
         run: npx prisma generate
+
       - name: Run Prisma Migration
         run: npx prisma migrate deploy
-        
+
       - name: Build Next.js App
         run: npm run build
