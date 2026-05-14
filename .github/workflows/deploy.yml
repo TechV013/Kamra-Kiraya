@@ -1,5 +1,6 @@
 name: Deploy StayFinder
 
+
 on:
   push:
     branches:
@@ -10,7 +11,8 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-        DATABASE_URL: "***REMOVED***"
+      DATABASE_URL:  "***REMOVED***"
+
 
     steps:
       - name: Checkout Code
