@@ -1,5 +1,6 @@
 name: Deploy StayFinder
 
+
 on:
   push:
     branches:
@@ -10,7 +11,8 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-        DATABASE_URL: "postgresql://postgres.avnbpkbqzsxpspnbhejx:wcRmeT1LnPyZH1ed85TgBCCU97Q88GbldPlGApugUMnkh5VEUdBu3JTMGv8SeCS4@aws-0-us-west-2.pooler.supabase.com:5432/postgres"
+      DATABASE_URL:  "postgresql://postgres.avnbpkbqzsxpspnbhejx:wcRmeT1LnPyZH1ed85TgBCCU97Q88GbldPlGApugUMnkh5VEUdBu3JTMGv8SeCS4@aws-0-us-west-2.pooler.supabase.com:5432/postgres"
+
 
     steps:
       - name: Checkout Code
