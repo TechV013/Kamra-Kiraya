@@ -13,7 +13,7 @@ interface PaymentRecord {
   bookingId: string;
   amount: number;
   currency: string;
-  status: "PENDING" | "SUCCEEDED" | "FAILED" | "REFUNDED";
+  status: "PENDING" | "VERIFICATION_PENDING" | "SUCCEEDED" | "FAILED" | "REFUNDED";
   transactionRef?: string;
   paymentReference?: string;
   createdAt: string;
@@ -58,22 +58,31 @@ export default function PaymentsPage() {
   };
 
   const getStatusBadge = (status: string) => {
-    const styles = {
+    const styles: Record<string, string> = {
       PENDING: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300",
+      VERIFICATION_PENDING: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300",
       SUCCEEDED: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
       FAILED: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
       REFUNDED: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
     };
-    const icons = {
+    const icons: Record<string, React.ReactNode> = {
       PENDING: <Clock className="w-4 h-4 inline mr-1" />,
+      VERIFICATION_PENDING: <Clock className="w-4 h-4 inline mr-1" />,
       SUCCEEDED: <CheckCircle className="w-4 h-4 inline mr-1" />,
       FAILED: <AlertCircle className="w-4 h-4 inline mr-1" />,
       REFUNDED: <CheckCircle className="w-4 h-4 inline mr-1" />,
     };
+    const labels: Record<string, string> = {
+      PENDING: "Pending",
+      VERIFICATION_PENDING: "Awaiting Owner Verification",
+      SUCCEEDED: "Paid",
+      FAILED: "Failed",
+      REFUNDED: "Refunded",
+    };
     return (
-      <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${styles[status as keyof typeof styles]}`}>
-        {icons[status as keyof typeof icons]}
-        {status}
+      <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${styles[status] || styles.PENDING}`}>
+        {icons[status]}
+        {labels[status] || status}
       </span>
     );
   };
@@ -150,6 +159,14 @@ export default function PaymentsPage() {
           <p className="mt-2 text-gray-600 dark:text-gray-400">Track your room booking payments and QR codes</p>
         </div>
 
+        {payments.some(p => p.status === "VERIFICATION_PENDING") && (
+          <div className="mb-6 rounded-2xl border border-orange-200 bg-orange-50 p-4 dark:border-orange-800 dark:bg-orange-900/20">
+            <p className="text-sm font-medium text-orange-800 dark:text-orange-300">
+              Some of your payments are awaiting owner verification. You will be notified once verified.
+            </p>
+          </div>
+        )}
+
         {payments.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 p-12 text-center">
             <QrCode className="w-12 h-12 text-gray-400 mx-auto mb-4" />
@@ -198,6 +215,14 @@ export default function PaymentsPage() {
                         <QrCode className="w-4 h-4" />
                         View & Pay with QR
                       </button>
+                    </div>
+                  )}
+
+                  {payment.status === "VERIFICATION_PENDING" && payment.paymentReference && (
+                    <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        Transaction ID submitted: <span className="font-mono text-gray-700 dark:text-gray-300">{payment.paymentReference}</span>
+                      </p>
                     </div>
                   )}
 
