@@ -220,7 +220,7 @@ export default function PaymentsPage() {
 
             <div className="grid place-items-center bg-gray-100 dark:bg-gray-700 rounded-xl p-4">
               <img
-                src={`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(generateQRPayload(selectedPayment.id, selectedPayment.amount))}`}
+                src={`/api/qr?paymentId=${selectedPayment.id}&amount=${selectedPayment.amount}`}
                 alt="UPI QR code"
                 className="w-64 h-64 rounded-lg"
               />
