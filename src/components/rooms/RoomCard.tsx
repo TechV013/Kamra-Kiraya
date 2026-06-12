@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { Heart, MapPin, Star, Users, Wifi, Car, Coffee } from "lucide-react";
@@ -9,6 +8,7 @@ import { useAuthStore } from "@/store/authStore";
 import { useWishlistStore } from "@/store/uiStore";
 import axios from "axios";
 import toast from "react-hot-toast";
+import RoomImage from "@/components/rooms/RoomImage";
 
 const AMENITY_ICONS: Record<string, React.ReactNode> = {
   WiFi: <Wifi className="w-3 h-3" />,
@@ -55,10 +55,6 @@ export default function RoomCard({ room, index = 0 }: RoomCardProps) {
     }
   };
 
-  const fallbackImage = "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=600&q=80";
-  const imageUrl = room.images?.[0] || fallbackImage;
-  const [imgError, setImgError] = useState(false);
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -71,11 +67,9 @@ export default function RoomCard({ room, index = 0 }: RoomCardProps) {
         <div className="glass-card rounded-2xl overflow-hidden hover-lift">
           {/* Image */}
           <div className="relative overflow-hidden h-52">
-            <img
-              src={imgError ? fallbackImage : imageUrl}
+            <RoomImage
+              src={room.images?.[0]}
               alt={room.title}
-              loading="lazy"
-              onError={() => setImgError(true)}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
             {/* Badge */}

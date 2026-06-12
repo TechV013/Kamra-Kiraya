@@ -13,6 +13,7 @@ import toast from "react-hot-toast";
 import { useAuthStore } from "@/store/authStore";
 import type { Booking } from "@/types";
 import { format } from "date-fns";
+import RoomImage from "@/components/rooms/RoomImage";
 
 const STATUS_COLORS: Record<string, string> = {
   PENDING: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300",
@@ -215,9 +216,9 @@ export default function StudentDashboard() {
                   <div className="flex flex-col sm:flex-row gap-4 p-5">
                     {/* Room image */}
                     <div className="sm:w-28 h-24 rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-700 shrink-0">
-                      <img
-                        src={booking.room?.images?.[0] || STUDENT_FALLBACK_IMAGE}
-                        alt={booking.room?.title}
+                      <RoomImage
+                        src={booking.room?.images?.[0]}
+                        alt={booking.room?.title || "Room"}
                         className="w-full h-full object-cover"
                       />
                     </div>

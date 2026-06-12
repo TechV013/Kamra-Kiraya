@@ -7,6 +7,7 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import { useAuthStore } from "@/store/authStore";
 import { Heart, Search } from "lucide-react";
+import RoomImage from "@/components/rooms/RoomImage";
 
 interface WishlistItem {
   id: string;
@@ -20,8 +21,6 @@ interface WishlistItem {
     images: string[];
   };
 }
-
-const WISHLIST_FALLBACK_IMAGE = "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=600&q=80";
 
 export default function WishlistPage() {
   const router = useRouter();
@@ -104,8 +103,8 @@ export default function WishlistPage() {
             {items.map((item) => (
               <div key={item.id} className="rounded-3xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
                 <div className="h-48 overflow-hidden bg-gray-100 dark:bg-gray-800">
-                  <img
-                    src={item.room.images?.[0] || WISHLIST_FALLBACK_IMAGE}
+                  <RoomImage
+                    src={item.room.images?.[0]}
                     alt={item.room.title}
                     className="h-full w-full object-cover"
                   />

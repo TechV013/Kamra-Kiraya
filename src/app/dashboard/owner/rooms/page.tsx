@@ -7,8 +7,7 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import { useAuthStore } from "@/store/authStore";
 import type { Room } from "@/types";
-
-const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=200&q=80";
+import RoomImage from "@/components/rooms/RoomImage";
 
 export default function OwnerRoomsPage() {
   const router = useRouter();
@@ -68,8 +67,8 @@ export default function OwnerRoomsPage() {
               <div key={room.id} className="rounded-3xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900 overflow-hidden">
                 <div className="grid gap-4 md:grid-cols-[180px_1fr] p-6">
                   <div className="h-44 overflow-hidden rounded-3xl bg-gray-100 dark:bg-gray-800">
-                    <img
-                      src={room.images?.[0] || FALLBACK_IMAGE}
+                    <RoomImage
+                      src={room.images?.[0]}
                       alt={room.title}
                       className="h-full w-full object-cover"
                     />
