@@ -6,7 +6,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import {
   Building2, Plus, Edit, Trash2, Users, BookOpen, DollarSign,
-  Clock, CheckCircle, XCircle, Eye, MapPin, Star, TrendingUp, AlertCircle
+  Clock, CheckCircle, XCircle, Eye, MapPin, Star, TrendingUp, AlertCircle, CreditCard
 } from "lucide-react";
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -152,6 +152,17 @@ export default function OwnerDashboard() {
             </Link>
           </div>
         )}
+
+        {/* Quick links */}
+        <div className="flex gap-3 mb-6">
+          <Link
+            href="/dashboard/owner/payments"
+            className="inline-flex items-center gap-2 rounded-xl bg-orange-50 border border-orange-200 px-4 py-2.5 text-sm font-medium text-orange-700 hover:bg-orange-100 dark:bg-orange-900/20 dark:border-orange-800 dark:text-orange-300 transition"
+          >
+            <CreditCard className="w-4 h-4" />
+            Payment Verification
+          </Link>
+        </div>
 
         {/* Tabs */}
         <div className="flex gap-1 mb-6 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl w-fit">
