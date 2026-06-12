@@ -104,7 +104,7 @@ export default function OwnerDashboard() {
             </div>
             <Link
               href="/dashboard/owner/add-room"
-              className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-sm font-medium rounded-xl hover:opacity-90 transition-opacity"
+              className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-maroon-600 to-maroon-600 text-white text-sm font-medium rounded-xl hover:opacity-90 transition-opacity"
             >
               <Plus className="w-4 h-4" />
               Add Room
@@ -117,9 +117,9 @@ export default function OwnerDashboard() {
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           {[
-            { label: "Total Listings", value: stats.totalRooms, icon: Building2, bg: "bg-indigo-100 dark:bg-indigo-900/30", text: "text-indigo-600 dark:text-indigo-400" },
+            { label: "Total Listings", value: stats.totalRooms, icon: Building2, bg: "bg-maroon-100 dark:bg-maroon-900/30", text: "text-maroon-600 dark:text-maroon-400" },
             { label: "Approved", value: stats.approvedRooms, icon: CheckCircle, bg: "bg-green-100 dark:bg-green-900/30", text: "text-green-600 dark:text-green-400" },
-            { label: "Bookings", value: stats.totalBookings, icon: BookOpen, bg: "bg-purple-100 dark:bg-purple-900/30", text: "text-purple-600 dark:text-purple-400" },
+            { label: "Bookings", value: stats.totalBookings, icon: BookOpen, bg: "bg-maroon-100 dark:bg-maroon-900/30", text: "text-maroon-600 dark:text-maroon-400" },
             { label: "Revenue", value: `₹${totalRevenue.toLocaleString()}`, icon: TrendingUp, bg: "bg-blue-100 dark:bg-blue-900/30", text: "text-blue-600 dark:text-blue-400" },
           ].map((s, i) => (
             <motion.div
@@ -195,7 +195,7 @@ export default function OwnerDashboard() {
                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Add your first room to start receiving bookings</p>
                 <Link
                   href="/dashboard/owner/add-room"
-                  className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white text-sm rounded-xl hover:bg-indigo-700 transition-colors"
+                  className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 bg-maroon-600 text-white text-sm rounded-xl hover:bg-maroon-700 transition-colors"
                 >
                   <Plus className="w-4 h-4" /> Add Your First Room
                 </Link>
@@ -247,13 +247,13 @@ export default function OwnerDashboard() {
                       <div className="flex items-center gap-2 sm:flex-col sm:items-end shrink-0">
                         <Link
                           href={`/rooms/${room.id}`}
-                          className="p-2 rounded-lg border border-gray-200 dark:border-gray-600 text-gray-500 hover:text-indigo-600 hover:border-indigo-400 transition-colors"
+                          className="p-2 rounded-lg border border-gray-200 dark:border-gray-600 text-gray-500 hover:text-maroon-600 hover:border-maroon-400 transition-colors"
                         >
                           <Eye className="w-4 h-4" />
                         </Link>
                         <Link
                           href={`/dashboard/owner/edit-room/${room.id}`}
-                          className="p-2 rounded-lg border border-gray-200 dark:border-gray-600 text-gray-500 hover:text-indigo-600 hover:border-indigo-400 transition-colors"
+                          className="p-2 rounded-lg border border-gray-200 dark:border-gray-600 text-gray-500 hover:text-maroon-600 hover:border-maroon-400 transition-colors"
                         >
                           <Edit className="w-4 h-4" />
                         </Link>

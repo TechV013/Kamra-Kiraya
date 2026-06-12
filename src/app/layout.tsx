@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+
 import { VisualEditsMessenger } from "orchids-visual-edits";
 import { Toaster } from "react-hot-toast";
+
 import Navbar from "@/components/shared/Navbar";
 import Footer from "@/components/shared/Footer";
+import SmoothScroll from "@/components/providers/SmoothScroll";
+import ChatbotWrapper from "@/components/ai/ChatbotWrapper";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -20,7 +24,8 @@ export const metadata: Metadata = {
   title: "कमरा किराया – Student Room Booking Platform",
   description:
     "Find and book verified rental rooms, PG, and hostels near your college. कमरा किराया makes student accommodation easy.",
-  keywords: "student rooms, PG, hostel, rental rooms, college accommodation, कमरा किराया",
+  keywords:
+    "student rooms, PG, hostel, rental rooms, college accommodation, कमरा किराया",
 };
 
 export default function RootLayout({
@@ -30,10 +35,21 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <Navbar />
-        <main className="min-h-screen pt-16">{children}</main>
-        <Footer />
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
+        <SmoothScroll>
+          <Navbar />
+
+          <main className="min-h-screen pt-16">
+            {children}
+          </main>
+
+          <Footer />
+        </SmoothScroll>
+
+        <ChatbotWrapper />
+
         <Toaster
           position="top-right"
           toastOptions={{
@@ -47,6 +63,7 @@ export default function RootLayout({
             },
           }}
         />
+
         <VisualEditsMessenger />
       </body>
     </html>

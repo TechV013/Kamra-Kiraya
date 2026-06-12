@@ -16,6 +16,7 @@ enum Role {
 enum BookingStatus {
   PENDING
   CONFIRMED
+  REJECTED
   CANCELLED
   COMPLETED
 }
@@ -25,6 +26,7 @@ enum PaymentStatus {
   SUCCEEDED
   FAILED
   REFUNDED
+  VERIFICATION_PENDING
 }
 
 enum RoomType {
@@ -49,23 +51,27 @@ enum PropertyStatus {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String
-  email         String    @unique
-  password      String
-  phone         String?
-  avatar        String?
-  role          Role      @default(STUDENT)
-  isVerified    Boolean   @default(false)
-  isActive      Boolean   @default(true)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id                  String    @id @default(cuid())
+  name                String
+  email               String    @unique
+  password            String
+  phone               String?
+  avatar              String?
+  role                Role      @default(STUDENT)
+  isVerified          Boolean   @default(false)
+  isActive            Boolean   @default(true)
+  failedLoginAttempts Int       @default(0)
+  lockedUntil         DateTime?
+  resetToken          String?
+  resetTokenExpiry    DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 
-  rooms         Room[]
-  bookings      Booking[]
-  reviews       Review[]
-  wishlist      Wishlist[]
-  notifications Notification[]
+  rooms               Room[]
+  bookings            Booking[]
+  reviews             Review[]
+  wishlist            Wishlist[]
+  notifications       Notification[]
 
   @@map("users")
 }
@@ -92,6 +98,7 @@ model Room {
   rules          String[]
   rating         Float          @default(0)
   reviewCount    Int            @default(0)
+  viewCount      Int            @default(0)
   isAvailable    Boolean        @default(true)
   ownerId        String
   createdAt      DateTime       @default(now())
@@ -102,6 +109,10 @@ model Room {
   reviews        Review[]
   wishlist       Wishlist[]
 
+  @@index([city, status])
+  @@index([priceDaily, priceMonthly])
+  @@index([status, createdAt])
+  @@index([ownerId])
   @@map("rooms")
 }
 
@@ -127,18 +138,22 @@ model Booking {
 }
 
 model Payment {
-  id              String        @id @default(cuid())
-  bookingId       String        @unique
-  amount          Float
-  currency        String        @default("usd")
-  status          PaymentStatus @default(PENDING)
-  stripePaymentId String?
-  stripeSessionId String?
-  refundId        String?
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  id                String        @id @default(cuid())
+  bookingId         String        @unique
+  amount            Float
+  currency          String        @default("usd")
+  status            PaymentStatus @default(PENDING)
+  razorpayOrderId   String?
+  razorpayPaymentId String?
+  stripePaymentId   String?
+  stripeSessionId   String?
+  refundId          String?
+  paymentReference  String?
+  transactionRef    String?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
 
-  booking         Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  booking           Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
 
   @@map("payments")
 }

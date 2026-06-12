@@ -83,3 +83,19 @@ export function withErrorHandler<T extends (...args: any[]) => Promise<any>>(
     }
   }) as T;
 }
+
+import { ZodSchema } from "zod";
+
+export async function validateBody<T>(req: NextRequest, schema: ZodSchema<T>) {
+  try {
+    const body = await req.json();
+    const result = schema.safeParse(body);
+    if (!result.success) {
+      const errorMsg = result.error.issues.map(err => `${err.path.join(".")}: ${err.message}`).join("; ");
+      return { data: null, errorResponse: apiError(errorMsg, 400) };
+    }
+    return { data: result.data, errorResponse: null };
+  } catch (err) {
+    return { data: null, errorResponse: apiError("Invalid JSON body", 400) };
+  }
+}

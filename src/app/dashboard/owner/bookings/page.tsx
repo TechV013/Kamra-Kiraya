@@ -32,6 +32,13 @@ interface Booking {
     avatar?: string;
     phone?: string;
   };
+  payment?: {
+    id: string;
+    status: string;
+    transactionRef?: string;
+    paymentReference?: string;
+    amount: number;
+  } | null;
 }
 
 export default function OwnerBookingsPage() {
@@ -41,6 +48,7 @@ export default function OwnerBookingsPage() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "pending" | "approved" | "rejected">("pending");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [paymentActionLoading, setPaymentActionLoading] = useState<string | null>(null);
 
   useEffect(() => {
     if (!token) {
@@ -127,10 +135,34 @@ export default function OwnerBookingsPage() {
     }
   };
 
+  const handlePaymentAction = async (paymentId: string, action: "approve" | "reject") => {
+    setPaymentActionLoading(paymentId);
+    try {
+      await axios.post(
+        "/api/payments/approve",
+        { paymentId, action },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      toast.success(action === "approve" ? "Payment approved!" : "Payment rejected");
+      setBookings((prev) =>
+        prev.map((b) =>
+          b.payment?.id === paymentId
+            ? { ...b, payment: { ...b.payment!, status: action === "approve" ? "SUCCEEDED" : "FAILED" } }
+            : b
+        )
+      );
+    } catch (err: any) {
+      toast.error(err?.response?.data?.error || "Payment action failed");
+    } finally {
+      setPaymentActionLoading(null);
+    }
+  };
+
   const filtered = bookings.filter((booking) => {
     if (filter === "pending") return booking.status === "PENDING";
     if (filter === "approved") return booking.status === "CONFIRMED";
     if (filter === "rejected") return booking.status === "REJECTED";
+    if (filter === "payment_pending") return booking.payment?.status === "VERIFICATION_PENDING";
     return true;
   });
 
@@ -180,6 +212,7 @@ export default function OwnerBookingsPage() {
         <div className="mb-8 flex flex-wrap gap-3 border-b border-gray-200 dark:border-gray-800">
           {[
             { key: "pending", label: "Pending Approval", count: bookings.filter((b) => b.status === "PENDING").length },
+            { key: "payment_pending", label: "Payment Verification", count: bookings.filter((b) => b.payment?.status === "VERIFICATION_PENDING").length },
             { key: "approved", label: "Approved", count: bookings.filter((b) => b.status === "CONFIRMED").length },
             { key: "rejected", label: "Rejected", count: bookings.filter((b) => b.status === "REJECTED").length },
             { key: "all", label: "All Bookings", count: bookings.length },
@@ -189,7 +222,7 @@ export default function OwnerBookingsPage() {
               onClick={() => setFilter(tab.key as any)}
               className={`pb-4 px-2 text-sm font-medium border-b-2 transition ${
                 filter === tab.key
-                  ? "border-indigo-600 text-indigo-600 dark:text-indigo-400"
+                  ? "border-maroon-600 text-maroon-600 dark:text-maroon-400"
                   : "border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300"
               }`}
             >
@@ -213,6 +246,8 @@ export default function OwnerBookingsPage() {
             <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
               {filter === "pending"
                 ? "No pending booking requests at this moment."
+                : filter === "payment_pending"
+                ? "No payments pending verification."
                 : "No bookings match your filter."}
             </p>
           </div>
@@ -284,7 +319,7 @@ export default function OwnerBookingsPage() {
                       </div>
                       <div>
                         <p className="text-gray-500 dark:text-gray-400">Total Amount</p>
-                        <p className="font-medium text-indigo-600 dark:text-indigo-400">
+                        <p className="font-medium text-maroon-600 dark:text-maroon-400">
                           ₹{booking.totalAmount.toLocaleString()}
                         </p>
                       </div>
@@ -294,6 +329,37 @@ export default function OwnerBookingsPage() {
                       <div className="rounded-lg bg-gray-50 p-3 dark:bg-gray-800/50">
                         <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Special Note</p>
                         <p className="mt-1 text-sm text-gray-900 dark:text-white">{booking.specialNote}</p>
+                      </div>
+                    )}
+
+                    {/* Payment Verification Info */}
+                    {booking.payment && booking.payment.status === "VERIFICATION_PENDING" && (
+                      <div className="rounded-lg bg-yellow-50 border border-yellow-200 p-3 dark:bg-yellow-900/20 dark:border-yellow-800">
+                        <p className="text-xs font-medium text-yellow-700 dark:text-yellow-300">Payment Pending Verification</p>
+                        <p className="mt-1 text-sm text-gray-900 dark:text-white">
+                          Transaction ID: <span className="font-mono">{booking.payment.paymentReference}</span>
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                          Amount: ₹{booking.payment.amount.toLocaleString()}
+                        </p>
+                        <div className="flex gap-2 mt-3">
+                          <button
+                            onClick={() => handlePaymentAction(booking.payment!.id, "approve")}
+                            disabled={paymentActionLoading === booking.payment!.id}
+                            className="inline-flex items-center gap-1 rounded-lg bg-green-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-green-500 disabled:opacity-60 transition"
+                          >
+                            <CheckCircle2 className="w-3 h-3" />
+                            Approve Payment
+                          </button>
+                          <button
+                            onClick={() => handlePaymentAction(booking.payment!.id, "reject")}
+                            disabled={paymentActionLoading === booking.payment!.id}
+                            className="inline-flex items-center gap-1 rounded-lg bg-red-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-500 disabled:opacity-60 transition"
+                          >
+                            <XCircle className="w-3 h-3" />
+                            Reject Payment
+                          </button>
+                        </div>
                       </div>
                     )}
                   </div>

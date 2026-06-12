@@ -195,7 +195,7 @@ export default function EditRoomPage() {
                 value={title}
                 onChange={(event) => setTitle(event.target.value)}
                 placeholder="Room title"
-                className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-maroon-500 focus:ring-1 focus:ring-maroon-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
               />
             </label>
             <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
@@ -205,7 +205,7 @@ export default function EditRoomPage() {
                 onChange={(event) => setDescription(event.target.value)}
                 placeholder="Describe the room"
                 rows={5}
-                className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-maroon-500 focus:ring-1 focus:ring-maroon-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
               />
             </label>
           </div>
@@ -217,7 +217,7 @@ export default function EditRoomPage() {
                 value={address}
                 onChange={(event) => setAddress(event.target.value)}
                 placeholder="Street address"
-                className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-maroon-500 focus:ring-1 focus:ring-maroon-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
               />
             </label>
             <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
@@ -226,7 +226,7 @@ export default function EditRoomPage() {
                 value={city}
                 onChange={(event) => setCity(event.target.value)}
                 placeholder="City"
-                className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-maroon-500 focus:ring-1 focus:ring-maroon-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
               />
             </label>
             <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
@@ -235,7 +235,7 @@ export default function EditRoomPage() {
                 value={stateValue}
                 onChange={(event) => setStateValue(event.target.value)}
                 placeholder="State"
-                className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-maroon-500 focus:ring-1 focus:ring-maroon-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
               />
             </label>
           </div>
@@ -247,7 +247,7 @@ export default function EditRoomPage() {
                 value={zipCode}
                 onChange={(event) => setZipCode(event.target.value)}
                 placeholder="123456"
-                className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-maroon-500 focus:ring-1 focus:ring-maroon-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
               />
             </label>
             <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
@@ -256,7 +256,7 @@ export default function EditRoomPage() {
                 value={latitude}
                 onChange={(event) => setLatitude(event.target.value)}
                 placeholder="12.9716"
-                className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-maroon-500 focus:ring-1 focus:ring-maroon-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
               />
             </label>
             <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
@@ -265,7 +265,7 @@ export default function EditRoomPage() {
                 value={longitude}
                 onChange={(event) => setLongitude(event.target.value)}
                 placeholder="77.5946"
-                className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-maroon-500 focus:ring-1 focus:ring-maroon-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
               />
             </label>
           </div>
@@ -278,7 +278,7 @@ export default function EditRoomPage() {
                 value={priceDaily}
                 onChange={(event) => setPriceDaily(event.target.value)}
                 placeholder="0"
-                className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-maroon-500 focus:ring-1 focus:ring-maroon-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
               />
             </label>
             <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
@@ -288,7 +288,7 @@ export default function EditRoomPage() {
                 value={priceMonthly}
                 onChange={(event) => setPriceMonthly(event.target.value)}
                 placeholder="0"
-                className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-maroon-500 focus:ring-1 focus:ring-maroon-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
               />
             </label>
             <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
@@ -296,7 +296,7 @@ export default function EditRoomPage() {
               <select
                 value={roomType}
                 onChange={(event) => setRoomType(event.target.value as RoomType)}
-                className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-maroon-500 focus:ring-1 focus:ring-maroon-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
               >
                 {ROOM_TYPES.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -315,7 +315,7 @@ export default function EditRoomPage() {
                 min="1"
                 value={maxOccupancy}
                 onChange={(event) => setMaxOccupancy(event.target.value)}
-                className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-maroon-500 focus:ring-1 focus:ring-maroon-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
               />
             </label>
             <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
@@ -325,7 +325,7 @@ export default function EditRoomPage() {
                 min="1"
                 value={totalRooms}
                 onChange={(event) => setTotalRooms(event.target.value)}
-                className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-maroon-500 focus:ring-1 focus:ring-maroon-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
               />
             </label>
             <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
@@ -334,7 +334,7 @@ export default function EditRoomPage() {
                 value={images}
                 onChange={(event) => setImages(event.target.value)}
                 placeholder="Comma-separated image URLs"
-                className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-maroon-500 focus:ring-1 focus:ring-maroon-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
               />
             </label>
           </div>
@@ -346,7 +346,7 @@ export default function EditRoomPage() {
                 value={amenities}
                 onChange={(event) => setAmenities(event.target.value)}
                 placeholder="WiFi, Parking, Meals"
-                className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-maroon-500 focus:ring-1 focus:ring-maroon-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
               />
             </label>
             <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
@@ -355,7 +355,7 @@ export default function EditRoomPage() {
                 value={rules}
                 onChange={(event) => setRules(event.target.value)}
                 placeholder="No smoking, No pets"
-                className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-maroon-500 focus:ring-1 focus:ring-maroon-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
               />
             </label>
           </div>
@@ -365,7 +365,7 @@ export default function EditRoomPage() {
             <button
               type="submit"
               disabled={submitting}
-              className="inline-flex items-center justify-center rounded-2xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center justify-center rounded-2xl bg-maroon-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-maroon-500 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {submitting ? "Updating..." : "Update Room"}
             </button>

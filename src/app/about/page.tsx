@@ -9,7 +9,7 @@ export default function AboutPage() {
       <div className="max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
         <div className="grid gap-12 lg:grid-cols-[1.2fr_0.8fr] items-center">
           <div>
-            <span className="inline-flex items-center gap-2 rounded-full bg-indigo-100 px-4 py-2 text-sm font-semibold text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-200">
+            <span className="inline-flex items-center gap-2 rounded-full bg-maroon-100 px-4 py-2 text-sm font-semibold text-maroon-700 dark:bg-maroon-900/40 dark:text-maroon-200">
               <Building2 className="w-4 h-4" /> About कमरा किराया
             </span>
             <h1 className="mt-6 text-4xl font-bold tracking-tight sm:text-5xl">
@@ -26,14 +26,14 @@ export default function AboutPage() {
                 { icon: MapPin, label: "City coverage", desc: "Browse rooms across top student cities." },
               ].map((feature) => (
                 <div key={feature.label} className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
-                  <feature.icon className="h-5 w-5 text-indigo-600 dark:text-indigo-300" />
+                  <feature.icon className="h-5 w-5 text-maroon-600 dark:text-maroon-300" />
                   <h2 className="mt-4 text-lg font-semibold">{feature.label}</h2>
                   <p className="mt-2 text-sm leading-6 text-gray-600 dark:text-gray-400">{feature.desc}</p>
                 </div>
               ))}
             </div>
             <div className="mt-10 flex flex-col gap-3 sm:flex-row">
-              <Link href="/browse" className="inline-flex items-center justify-center rounded-2xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white hover:bg-indigo-500 transition">
+              <Link href="/browse" className="inline-flex items-center justify-center rounded-2xl bg-maroon-600 px-6 py-3 text-sm font-semibold text-white hover:bg-maroon-500 transition">
                 Browse Rooms
               </Link>
               <Link href="/contact" className="inline-flex items-center justify-center rounded-2xl border border-gray-200 bg-white px-6 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-100 transition dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800">
@@ -42,10 +42,10 @@ export default function AboutPage() {
             </div>
           </div>
 
-          <div className="rounded-3xl bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 p-10 text-white shadow-2xl">
+          <div className="rounded-3xl bg-gradient-to-br from-maroon-600 via-maroon-600 to-pink-500 p-10 text-white shadow-2xl">
             <div className="grid gap-6">
               <div className="rounded-3xl bg-white/10 p-6">
-                <p className="text-sm uppercase tracking-[0.24em] text-indigo-100/80">Our mission</p>
+                <p className="text-sm uppercase tracking-[0.24em] text-maroon-100/80">Our mission</p>
                 <p className="mt-4 text-xl font-semibold">Helping every student find a comfortable home.</p>
               </div>
               <div className="grid gap-4 rounded-3xl bg-white/10 p-6">

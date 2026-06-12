@@ -50,7 +50,7 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen flex">
       {/* Left - Illustration */}
-      <div className="hidden lg:flex flex-1 bg-gradient-to-br from-indigo-600 via-purple-600 to-purple-700 items-center justify-center p-12">
+      <div className="hidden lg:flex flex-1 bg-gradient-to-br from-maroon-600 via-maroon-600 to-maroon-700 items-center justify-center p-12">
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -60,7 +60,7 @@ export default function RegisterPage() {
             <Building2 className="w-12 h-12 text-white" />
           </div>
           <h2 className="text-3xl font-bold mb-4">Start Your Journey Today</h2>
-          <p className="text-indigo-100 text-lg leading-relaxed">
+          <p className="text-maroon-100 text-lg leading-relaxed">
             Create your free account and discover thousands of verified rooms near your college.
           </p>
         </motion.div>
@@ -74,10 +74,10 @@ export default function RegisterPage() {
           className="w-full max-w-md"
         >
           <div className="flex items-center gap-2 mb-8">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-maroon-600 to-maroon-600 flex items-center justify-center">
               <span className="text-white font-bold text-sm">कK</span>
             </div>
-            <span className="font-bold text-xl bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+            <span className="font-bold text-xl bg-gradient-to-r from-maroon-600 to-maroon-600 bg-clip-text text-transparent">
               कमरा किराया
             </span>
           </div>
@@ -92,13 +92,13 @@ export default function RegisterPage() {
               onClick={() => setRole("STUDENT")}
               className={`flex items-center gap-2.5 p-4 rounded-xl border-2 transition-all ${
                 role === "STUDENT"
-                  ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-950/40"
-                  : "border-gray-200 dark:border-gray-700 hover:border-indigo-300"
+                  ? "border-maroon-500 bg-maroon-50 dark:bg-maroon-950/40"
+                  : "border-gray-200 dark:border-gray-700 hover:border-maroon-300"
               }`}
             >
-              <GraduationCap className={`w-5 h-5 ${role === "STUDENT" ? "text-indigo-600" : "text-gray-400"}`} />
+              <GraduationCap className={`w-5 h-5 ${role === "STUDENT" ? "text-maroon-600" : "text-gray-400"}`} />
               <div className="text-left">
-                <p className={`text-sm font-semibold ${role === "STUDENT" ? "text-indigo-700 dark:text-indigo-300" : "text-gray-700 dark:text-gray-200"}`}>Student</p>
+                <p className={`text-sm font-semibold ${role === "STUDENT" ? "text-maroon-700 dark:text-maroon-300" : "text-gray-700 dark:text-gray-200"}`}>Student</p>
                 <p className="text-xs text-gray-400">Find rooms</p>
               </div>
             </button>
@@ -107,13 +107,13 @@ export default function RegisterPage() {
               onClick={() => setRole("OWNER")}
               className={`flex items-center gap-2.5 p-4 rounded-xl border-2 transition-all ${
                 role === "OWNER"
-                  ? "border-purple-500 bg-purple-50 dark:bg-purple-950/40"
-                  : "border-gray-200 dark:border-gray-700 hover:border-purple-300"
+                  ? "border-maroon-500 bg-maroon-50 dark:bg-maroon-950/40"
+                  : "border-gray-200 dark:border-gray-700 hover:border-maroon-300"
               }`}
             >
-              <Home className={`w-5 h-5 ${role === "OWNER" ? "text-purple-600" : "text-gray-400"}`} />
+              <Home className={`w-5 h-5 ${role === "OWNER" ? "text-maroon-600" : "text-gray-400"}`} />
               <div className="text-left">
-                <p className={`text-sm font-semibold ${role === "OWNER" ? "text-purple-700 dark:text-purple-300" : "text-gray-700 dark:text-gray-200"}`}>Owner</p>
+                <p className={`text-sm font-semibold ${role === "OWNER" ? "text-maroon-700 dark:text-maroon-300" : "text-gray-700 dark:text-gray-200"}`}>Owner</p>
                 <p className="text-xs text-gray-400">List property</p>
               </div>
             </button>
@@ -130,7 +130,7 @@ export default function RegisterPage() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="John Doe"
-                  className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-400 outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 transition-all"
+                  className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-400 outline-none focus:border-maroon-400 focus:ring-1 focus:ring-maroon-400 transition-all"
                 />
               </div>
             </div>
@@ -145,7 +145,7 @@ export default function RegisterPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
-                  className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-400 outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 transition-all"
+                  className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-400 outline-none focus:border-maroon-400 focus:ring-1 focus:ring-maroon-400 transition-all"
                 />
               </div>
             </div>
@@ -160,7 +160,7 @@ export default function RegisterPage() {
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="+91 9876543210"
-                  className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-400 outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 transition-all"
+                  className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-400 outline-none focus:border-maroon-400 focus:ring-1 focus:ring-maroon-400 transition-all"
                 />
               </div>
             </div>
@@ -175,7 +175,7 @@ export default function RegisterPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Min 6 characters"
-                  className="w-full pl-10 pr-10 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-400 outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 transition-all"
+                  className="w-full pl-10 pr-10 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-400 outline-none focus:border-maroon-400 focus:ring-1 focus:ring-maroon-400 transition-all"
                 />
                 <button type="button" onClick={() => setShowPwd((p) => !p)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
                   {showPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -193,7 +193,7 @@ export default function RegisterPage() {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Repeat password"
-                  className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-400 outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 transition-all"
+                  className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-400 outline-none focus:border-maroon-400 focus:ring-1 focus:ring-maroon-400 transition-all"
                 />
               </div>
             </div>
@@ -201,7 +201,7 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-xl hover:opacity-90 disabled:opacity-50 transition-opacity shadow-md flex items-center justify-center gap-2"
+              className="w-full py-3 bg-gradient-to-r from-maroon-600 to-maroon-600 text-white font-semibold rounded-xl hover:opacity-90 disabled:opacity-50 transition-opacity shadow-md flex items-center justify-center gap-2"
             >
               {loading ? "Creating account..." : (
                 <>Create Account <ArrowRight className="w-4 h-4" /></>
@@ -211,7 +211,7 @@ export default function RegisterPage() {
 
           <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-6">
             Already have an account?{" "}
-            <Link href="/login" className="text-indigo-600 font-medium hover:underline">Sign in</Link>
+            <Link href="/login" className="text-maroon-600 font-medium hover:underline">Sign in</Link>
           </p>
         </motion.div>
       </div>

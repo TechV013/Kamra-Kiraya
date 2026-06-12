@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Eye, EyeOff, Building2, Mail, Lock, ArrowRight } from "lucide-react";
+import { Eye, EyeOff, Building2, Mail, Lock, ArrowRight, CheckCircle, XCircle } from "lucide-react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useAuthStore } from "@/store/authStore";
@@ -15,12 +15,35 @@ export default function LoginPage() {
   const { login } = useAuthStore();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [emailStatus, setEmailStatus] = useState<"idle" | "checking" | "exists" | "not-found">("idle");
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const redirect = params.get("redirect") || "";
     setRedirectTarget(redirect);
   }, []);
+
+  const checkEmail = useCallback(async (emailValue: string) => {
+    if (!emailValue || !emailValue.includes("@")) {
+      setEmailStatus("idle");
+      return;
+    }
+    setEmailStatus("checking");
+    try {
+      const res = await axios.post("/api/auth/check-email", { email: emailValue });
+      setEmailStatus(res.data.exists ? "exists" : "not-found");
+    } catch {
+      setEmailStatus("idle");
+    }
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (email) checkEmail(email);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [email, checkEmail]);
+
   const [showPwd, setShowPwd] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -55,10 +78,10 @@ export default function LoginPage() {
           className="w-full max-w-md"
         >
           <div className="flex items-center gap-2 mb-8">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-maroon-600 to-maroon-600 flex items-center justify-center">
               <Building2 className="w-5 h-5 text-white" />
             </div>
-            <span className="font-bold text-xl bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+            <span className="font-bold text-xl bg-gradient-to-r from-maroon-600 to-maroon-600 bg-clip-text text-transparent">
               कमरा किराया
             </span>
           </div>
@@ -76,15 +99,27 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
-                  className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-400 outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 transition-all"
+                  className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-400 outline-none focus:border-maroon-400 focus:ring-1 focus:ring-maroon-400 transition-all"
                 />
               </div>
+              {emailStatus === "not-found" && email.includes("@") && (
+                <p className="flex items-center gap-1.5 mt-1.5 text-xs text-red-500">
+                  <XCircle className="w-3.5 h-3.5" />
+                  No account found with this email. <Link href="/register" className="text-maroon-600 font-medium hover:underline">Create one</Link>
+                </p>
+              )}
+              {emailStatus === "exists" && (
+                <p className="flex items-center gap-1.5 mt-1.5 text-xs text-emerald-600">
+                  <CheckCircle className="w-3.5 h-3.5" />
+                  Email found — enter your password to sign in
+                </p>
+              )}
             </div>
 
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
-                <Link href="/forgot-password" className="text-xs text-indigo-600 hover:underline">
+                <Link href="/forgot-password" className="text-xs text-maroon-600 hover:underline">
                   Forgot password?
                 </Link>
               </div>
@@ -95,7 +130,7 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-10 pr-10 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-400 outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 transition-all"
+                  className="w-full pl-10 pr-10 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-400 outline-none focus:border-maroon-400 focus:ring-1 focus:ring-maroon-400 transition-all"
                 />
                 <button
                   type="button"
@@ -110,7 +145,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-xl hover:opacity-90 disabled:opacity-50 transition-opacity shadow-md flex items-center justify-center gap-2"
+              className="w-full py-3 bg-gradient-to-r from-maroon-600 to-maroon-600 text-white font-semibold rounded-xl hover:opacity-90 disabled:opacity-50 transition-opacity shadow-md flex items-center justify-center gap-2"
             >
               {loading ? "Signing in..." : (
                 <>Sign in <ArrowRight className="w-4 h-4" /></>
@@ -120,15 +155,15 @@ export default function LoginPage() {
 
           <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-6">
             Don&apos;t have an account?{" "}
-            <Link href="/register" className="text-indigo-600 font-medium hover:underline">
+            <Link href="/register" className="text-maroon-600 font-medium hover:underline">
               Create one
             </Link>
           </p>
 
           {/* Demo credentials */}
-          <div className="mt-6 p-4 bg-indigo-50 dark:bg-indigo-950/30 rounded-xl border border-indigo-100 dark:border-indigo-800">
-            <p className="text-xs font-semibold text-indigo-700 dark:text-indigo-300 mb-2">Demo Credentials</p>
-            <div className="space-y-1 text-xs text-indigo-600 dark:text-indigo-400">
+          <div className="mt-6 p-4 bg-maroon-50 dark:bg-maroon-950/30 rounded-xl border border-maroon-100 dark:border-maroon-800">
+            <p className="text-xs font-semibold text-maroon-700 dark:text-maroon-300 mb-2">Demo Credentials</p>
+            <div className="space-y-1 text-xs text-maroon-600 dark:text-maroon-400">
               <p>Admin: admin@kamarakiraya.in / admin123</p>
               <p>Student: student@test.in / student123</p>
               <p>Owner: owner@test.in / owner123</p>
@@ -138,7 +173,7 @@ export default function LoginPage() {
       </div>
 
       {/* Right - Illustration */}
-      <div className="hidden lg:flex flex-1 bg-gradient-to-br from-indigo-600 via-purple-600 to-purple-700 items-center justify-center p-12">
+      <div className="hidden lg:flex flex-1 bg-gradient-to-br from-maroon-600 via-maroon-600 to-maroon-700 items-center justify-center p-12">
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -148,7 +183,7 @@ export default function LoginPage() {
             <Building2 className="w-12 h-12 text-white" />
           </div>
           <h2 className="text-3xl font-bold mb-4">Find Your Home Away From Home</h2>
-          <p className="text-indigo-100 text-lg leading-relaxed">
+          <p className="text-maroon-100 text-lg leading-relaxed">
             Join 50,000+ students who found their perfect room on कमरा किराया. Verified properties, transparent pricing.
           </p>
           <div className="mt-8 grid grid-cols-3 gap-4">
@@ -159,7 +194,7 @@ export default function LoginPage() {
             ].map((s) => (
               <div key={s.label} className="bg-white/10 rounded-xl p-3">
                 <div className="text-2xl font-bold">{s.value}</div>
-                <div className="text-xs text-indigo-200">{s.label}</div>
+                <div className="text-xs text-maroon-200">{s.label}</div>
               </div>
             ))}
           </div>

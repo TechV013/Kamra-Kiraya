@@ -139,18 +139,18 @@ export default function ProfileSettingsPage() {
           <section className="rounded-[2rem] bg-white p-8 shadow-xl dark:bg-gray-900">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-indigo-600 dark:text-indigo-300">Account</p>
+                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-maroon-600 dark:text-maroon-300">Account</p>
                 <h1 className="mt-3 text-3xl font-bold text-gray-900 dark:text-white">Profile settings</h1>
                 <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">Update your name, phone, and profile image. Keep your account details current for the best experience.</p>
               </div>
-              <div className="inline-flex items-center gap-2 rounded-3xl bg-indigo-50 px-4 py-2 text-sm font-semibold text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-200">
+              <div className="inline-flex items-center gap-2 rounded-3xl bg-maroon-50 px-4 py-2 text-sm font-semibold text-maroon-700 dark:bg-maroon-900/40 dark:text-maroon-200">
                 <Shield className="w-4 h-4" /> {profile.role}
               </div>
             </div>
 
             <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_1fr]">
               <div className="space-y-4">
-                <div className="rounded-3xl bg-indigo-50 px-5 py-5 dark:bg-indigo-950/30">
+                <div className="rounded-3xl bg-maroon-50 px-5 py-5 dark:bg-maroon-950/30">
                   <p className="text-sm text-gray-500 dark:text-gray-400">Member since</p>
                   <p className="mt-2 text-lg font-semibold text-gray-900 dark:text-white">{profile.createdAt ? format(new Date(profile.createdAt), "MMMM d, yyyy") : "Not available"}</p>
                 </div>
@@ -186,7 +186,7 @@ export default function ProfileSettingsPage() {
                   <input
                     value={profile.name}
                     onChange={(event) => setProfile({ ...profile, name: event.target.value })}
-                    className="mt-2 w-full rounded-3xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+                    className="mt-2 w-full rounded-3xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none focus:border-maroon-500 focus:ring-1 focus:ring-maroon-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
                     placeholder="Enter your full name"
                   />
                 </label>
@@ -196,7 +196,7 @@ export default function ProfileSettingsPage() {
                   <input
                     value={profile.phone}
                     onChange={(event) => setProfile({ ...profile, phone: event.target.value })}
-                    className="mt-2 w-full rounded-3xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+                    className="mt-2 w-full rounded-3xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none focus:border-maroon-500 focus:ring-1 focus:ring-maroon-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
                     placeholder="+91 98765 43210"
                   />
                 </label>
@@ -208,7 +208,7 @@ export default function ProfileSettingsPage() {
                   <input
                     value={profile.avatar}
                     onChange={(event) => setProfile({ ...profile, avatar: event.target.value })}
-                    className="flex-1 rounded-3xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+                    className="flex-1 rounded-3xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none focus:border-maroon-500 focus:ring-1 focus:ring-maroon-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
                     placeholder="Paste an image URL"
                   />
                   <button
@@ -249,7 +249,7 @@ export default function ProfileSettingsPage() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="inline-flex items-center justify-center gap-2 rounded-3xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex items-center justify-center gap-2 rounded-3xl bg-maroon-600 px-6 py-3 text-sm font-semibold text-white hover:bg-maroon-500 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   <Save className="w-4 h-4" />
                   {saving ? "Saving changes…" : "Save changes"}
@@ -259,8 +259,8 @@ export default function ProfileSettingsPage() {
           </section>
 
           <aside className="space-y-6 rounded-[2rem] bg-white p-8 shadow-xl dark:bg-gray-900">
-            <div className="flex items-center gap-3 rounded-3xl bg-indigo-50 p-5 dark:bg-indigo-950/30">
-              <div className="inline-flex h-12 w-12 items-center justify-center rounded-3xl bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-200">
+            <div className="flex items-center gap-3 rounded-3xl bg-maroon-50 p-5 dark:bg-maroon-950/30">
+              <div className="inline-flex h-12 w-12 items-center justify-center rounded-3xl bg-maroon-100 text-maroon-700 dark:bg-maroon-900 dark:text-maroon-200">
                 <Camera className="w-6 h-6" />
               </div>
               <div>
@@ -295,7 +295,7 @@ export default function ProfileSettingsPage() {
 
             <Link
               href="/contact"
-              className="inline-flex items-center justify-center rounded-3xl border border-gray-200 bg-indigo-50 px-4 py-3 text-sm font-semibold text-indigo-700 hover:bg-indigo-100 dark:border-gray-700 dark:bg-gray-900 dark:text-indigo-200 dark:hover:bg-gray-800"
+              className="inline-flex items-center justify-center rounded-3xl border border-gray-200 bg-maroon-50 px-4 py-3 text-sm font-semibold text-maroon-700 hover:bg-maroon-100 dark:border-gray-700 dark:bg-gray-900 dark:text-maroon-200 dark:hover:bg-gray-800"
             >
               <Mail className="w-4 h-4" />
               Contact support

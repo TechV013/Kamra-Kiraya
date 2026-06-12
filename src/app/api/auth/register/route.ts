@@ -2,23 +2,30 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { signToken } from "@/lib/jwt";
-import { apiError } from "@/lib/api-helpers";
+import { apiError, validateBody } from "@/lib/api-helpers";
+import { registerSchema } from "@/lib/validations";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest) {
   try {
-    const { name, email, password, role = "STUDENT", phone } = await req.json();
-
-    if (!name || !email || !password) {
-      return apiError("Name, email, and password are required");
+    const ip = getClientIp(req);
+    const limit = rateLimit(ip, { maxRequests: 3, windowMs: 60_000 });
+    if (!limit.allowed) {
+      return NextResponse.json(
+        { error: "Too many registration attempts. Try again later." },
+        { status: 429, headers: { "Retry-After": String(Math.ceil(limit.resetIn / 1000)) } }
+      );
     }
+
+    const { data, errorResponse } = await validateBody(req, registerSchema);
+    if (errorResponse) return errorResponse;
+
+    const { name, email, password, role, phone } = data!;
 
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {
       return apiError("Email already registered", 409);
     }
-
-    const validRoles = ["STUDENT", "OWNER"];
-    const userRole = validRoles.includes(role) ? role : "STUDENT";
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
@@ -27,7 +34,7 @@ export async function POST(req: NextRequest) {
         name,
         email,
         password: hashedPassword,
-        role: userRole,
+        role: role,
         phone: phone || null,
       },
       select: {

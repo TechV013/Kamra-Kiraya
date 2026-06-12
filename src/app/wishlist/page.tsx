@@ -73,7 +73,7 @@ export default function WishlistPage() {
             <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">{user ? "Your saved rooms in one place." : "Sign in to view your saved rooms."}</p>
           </div>
           <div className="flex flex-wrap gap-3">
-            <Link href="/browse" className="inline-flex items-center gap-2 rounded-2xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white hover:bg-indigo-500 transition">
+            <Link href="/browse" className="inline-flex items-center gap-2 rounded-2xl bg-maroon-600 px-5 py-3 text-sm font-semibold text-white hover:bg-maroon-500 transition">
               <Search className="w-4 h-4" /> Browse rooms
             </Link>
             <Link href={user ? "/profile-settings" : "/login"} className="inline-flex items-center gap-2 rounded-2xl border border-gray-200 bg-white px-5 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-100 transition dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800">
@@ -90,12 +90,12 @@ export default function WishlistPage() {
           </div>
         ) : items.length === 0 ? (
           <div className="rounded-3xl border border-dashed border-gray-300 bg-white p-10 text-center dark:border-gray-700 dark:bg-gray-900">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-3xl bg-indigo-500/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-200">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-3xl bg-maroon-500/10 text-maroon-600 dark:bg-maroon-500/20 dark:text-maroon-200">
               <Heart className="h-6 w-6" />
             </div>
             <h2 className="mt-6 text-xl font-semibold text-gray-900 dark:text-white">No saved rooms yet</h2>
             <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">Add rooms to your wishlist while browsing so you can review them later.</p>
-            <Link href="/browse" className="mt-6 inline-flex rounded-2xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white hover:bg-indigo-500 transition">
+            <Link href="/browse" className="mt-6 inline-flex rounded-2xl bg-maroon-600 px-5 py-3 text-sm font-semibold text-white hover:bg-maroon-500 transition">
               Browse rooms
             </Link>
           </div>

@@ -154,7 +154,7 @@ export default function PaymentsPage() {
             <QrCode className="w-12 h-12 text-gray-400 mx-auto mb-4" />
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white">No payments yet</h2>
             <p className="mt-2 text-gray-600 dark:text-gray-400">Your booking payments will appear here</p>
-            <Link href="/browse" className="mt-6 inline-flex rounded-2xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white hover:bg-indigo-500 transition">
+            <Link href="/browse" className="mt-6 inline-flex rounded-2xl bg-maroon-600 px-5 py-3 text-sm font-semibold text-white hover:bg-maroon-500 transition">
               Browse rooms
             </Link>
           </div>
@@ -192,7 +192,7 @@ export default function PaymentsPage() {
                           setSelectedPayment(payment);
                           setShowQRModal(true);
                         }}
-                        className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-500 transition-colors text-sm font-medium"
+                        className="flex items-center gap-2 px-4 py-2 bg-maroon-600 text-white rounded-lg hover:bg-maroon-500 transition-colors text-sm font-medium"
                       >
                         <QrCode className="w-4 h-4" />
                         View & Pay with QR
@@ -232,7 +232,7 @@ export default function PaymentsPage() {
                   <div>{selectedPayment.transactionRef}</div>
                 </div>
               )}
-              <div className="flex justify-between items-center p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg">
+              <div className="flex justify-between items-center p-3 bg-maroon-50 dark:bg-maroon-900/20 rounded-lg">
                 <span className="text-gray-600 dark:text-gray-300">Amount</span>
                 <span className="font-bold text-gray-900 dark:text-white">₹{selectedPayment.amount.toLocaleString()}</span>
               </div>
@@ -240,7 +240,7 @@ export default function PaymentsPage() {
                 <span className="text-gray-600 dark:text-gray-300">UPI ID</span>
                 <button
                   onClick={() => copyToClipboard(process.env.NEXT_PUBLIC_UPI_ID || "")}
-                  className="text-indigo-600 dark:text-indigo-400 hover:underline font-mono text-xs flex items-center gap-1"
+                  className="text-maroon-600 dark:text-maroon-400 hover:underline font-mono text-xs flex items-center gap-1"
                 >
                   {process.env.NEXT_PUBLIC_UPI_ID} <Copy className="w-3 h-3" />
                 </button>
@@ -253,7 +253,7 @@ export default function PaymentsPage() {
                 value={paymentReferenceInput}
                 onChange={(e) => setPaymentReferenceInput(e.target.value)}
                 placeholder="Enter UPI transaction ID"
-                className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none focus:border-indigo-500 transition"
+                className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white outline-none focus:border-maroon-500 transition"
               />
               <button
                 onClick={handleVerifyPayment}

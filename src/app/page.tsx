@@ -5,13 +5,14 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import {
   Search, MapPin, Shield, Star, Users, ChevronRight,
-  Building2, Zap, Clock, CheckCircle, ArrowRight
+  Building2, Zap, Clock, CheckCircle, ArrowRight, Sparkles
 } from "lucide-react";
 import Link from "next/link";
 import axios from "axios";
 import type { Room } from "@/types";
 import RoomCard from "@/components/rooms/RoomCard";
 import { RoomCardSkeleton } from "@/components/shared/Skeletons";
+import AnimatedTitle from "@/components/animations/AnimatedTitle";
 
 const TESTIMONIALS = [
   {
@@ -50,14 +51,14 @@ const HOW_IT_WORKS = [
     title: "Search Rooms",
     desc: "Browse thousands of verified rooms in your city with advanced filters.",
     icon: Search,
-    color: "from-indigo-500 to-indigo-600",
+    color: "from-maroon-500 to-maroon-600",
   },
   {
     step: "2",
     title: "Choose & Book",
     desc: "Select your preferred room, choose daily or monthly plan, and book instantly.",
     icon: CheckCircle,
-    color: "from-purple-500 to-purple-600",
+    color: "from-maroon-500 to-maroon-600",
   },
   {
     step: "3",
@@ -94,6 +95,39 @@ export default function HomePage() {
   const [showDateOptions, setShowDateOptions] = useState(false);
   const [showGuestOptions, setShowGuestOptions] = useState(false);
 
+function AICardGrid() {
+  const [rooms, setRooms] = useState<Room[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    axios
+      .get("/api/recommendations?limit=6")
+      .then((r) => setRooms(r.data.rooms || []))
+      .catch(() => setRooms([]))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <RoomCardSkeleton key={i} />
+        ))}
+      </div>
+    );
+  }
+
+  if (rooms.length === 0) return null;
+
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {rooms.slice(0, 6).map((room, i) => (
+        <RoomCard key={room.id} room={room} index={i} />
+      ))}
+    </div>
+  );
+}
+
   const formattedDate = `${new Date(dateRange.from).toLocaleDateString("en-US", { month: "short", day: "numeric" })} - ${new Date(dateRange.to).toLocaleDateString("en-US", { month: "short", day: "numeric" })}`;
   const formattedGuests = `${guests.adults + guests.children} guests, ${guests.rooms} room`;
 
@@ -123,8 +157,8 @@ export default function HomePage() {
       <section className="relative min-h-[90vh] flex items-center gradient-hero">
         {/* Background decoration */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute -top-32 -right-32 w-[600px] h-[600px] rounded-full bg-indigo-200/30 dark:bg-indigo-900/20 blur-3xl" />
-          <div className="absolute -bottom-32 -left-32 w-[500px] h-[500px] rounded-full bg-purple-200/30 dark:bg-purple-900/20 blur-3xl" />
+          <div className="absolute -top-32 -right-32 w-[600px] h-[600px] rounded-full bg-maroon-200/30 dark:bg-maroon-900/20 blur-3xl" />
+          <div className="absolute -bottom-32 -left-32 w-[500px] h-[500px] rounded-full bg-maroon-200/30 dark:bg-maroon-900/20 blur-3xl" />
         </div>
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
@@ -134,21 +168,26 @@ export default function HomePage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
             >
-              <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 mb-6">
+              <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium bg-maroon-100 dark:bg-maroon-900/50 text-maroon-700 dark:text-maroon-300 mb-6">
                 <Shield className="w-3.5 h-3.5" />
                 100% Verified Rooms
               </span>
 
-              <h1 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white leading-tight mb-6">
-                Find Your Perfect{" "}
-                <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                  Student Room
-                </span>
-              </h1>
+              <div className="mb-6 flex justify-center">
+              <div className="max-w-4xl">
+               <AnimatedTitle />
+              </div>
+              </div>
 
-              <p className="text-xl text-gray-600 dark:text-gray-300 mb-10 max-w-2xl mx-auto leading-relaxed">
-                Browse thousands of verified PG, hostel, and rental rooms near your college. Book daily or monthly — your home away from home.
-              </p>
+<motion.p
+  initial={{ opacity: 0, y: 20 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ delay: 0.5, duration: 0.8 }}
+  className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-10 max-w-2xl mx-auto leading-relaxed"
+>
+  Browse thousands of verified PG, hostel, and rental rooms near your college.
+  Book daily or monthly — your home away from home.
+</motion.p>
 
               {/* Search Bar */}
               <motion.form
@@ -266,12 +305,51 @@ export default function HomePage() {
                       </div>
                     </div>
 
-                    <button
+                    <motion.button
                       type="submit"
-                      className="w-full rounded-3xl bg-gradient-to-r from-indigo-600 to-purple-600 px-5 py-4 text-sm font-semibold uppercase tracking-[0.04em] text-white shadow-lg shadow-indigo-500/20 transition duration-200 hover:opacity-95 hover:shadow-indigo-600/30"
+                      whileHover={{
+                        scale: 1.03,
+                        y: -3,
+                      }}
+                      whileTap={{
+                        scale: 0.96,
+                      }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 260,
+                        damping: 20,
+                      }}
+                      className="
+                        w-full
+                        rounded-3xl
+                        bg-gradient-to-r
+                        from-maroon-600
+                        via-maroon-600
+                        to-pink-600
+                        px-5
+                        py-4
+                        text-sm
+                        font-semibold
+                        uppercase
+                        tracking-[0.04em]
+                        text-white
+                        shadow-xl
+                        shadow-maroon-500/30
+                        hover:shadow-2xl
+                        hover:shadow-maroon-500/40
+                        transition-all
+                        duration-300
+                        relative
+                        overflow-hidden
+                      "
                     >
-                      Search
-                    </button>
+  <span className="relative z-10 flex items-center justify-center gap-2">
+    <Search className="w-4 h-4" />
+    Search Rooms
+  </span>
+
+  <div className="absolute inset-0 bg-white/10 opacity-0 hover:opacity-100 transition-opacity duration-300" />
+</motion.button>
                   </div>
                 </div>
               </motion.form>
@@ -286,7 +364,7 @@ export default function HomePage() {
                       const parts = tag.split(" ");
                       router.push(`/browse?city=${parts[0]}&search=${parts[1] || ""}`);
                     }}
-                    className="px-3 py-1 rounded-full text-xs font-medium bg-white/70 dark:bg-gray-800/70 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-600 hover:border-indigo-400 hover:text-indigo-600 transition-colors"
+                    className="px-3 py-1 rounded-full text-xs font-medium bg-white/70 dark:bg-gray-800/70 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-600 hover:border-maroon-400 hover:text-maroon-600 transition-colors"
                   >
                     {tag}
                   </button>
@@ -310,8 +388,8 @@ export default function HomePage() {
                 transition={{ delay: i * 0.1 }}
                 className="text-center"
               >
-                <div className="w-12 h-12 mx-auto mb-3 rounded-2xl bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/50 dark:to-purple-900/50 flex items-center justify-center">
-                  <stat.icon className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+                <div className="w-12 h-12 mx-auto mb-3 rounded-2xl bg-gradient-to-br from-maroon-100 to-maroon-100 dark:from-maroon-900/50 dark:to-maroon-900/50 flex items-center justify-center">
+                  <stat.icon className="w-6 h-6 text-maroon-600 dark:text-maroon-400" />
                 </div>
                 <div className="text-3xl font-bold text-gray-900 dark:text-white">{stat.value}</div>
                 <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">{stat.label}</div>
@@ -338,7 +416,7 @@ export default function HomePage() {
             </div>
             <Link
               href="/browse"
-              className="hidden md:flex items-center gap-1.5 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:gap-2.5 transition-all"
+              className="hidden md:flex items-center gap-1.5 text-sm font-medium text-maroon-600 dark:text-maroon-400 hover:gap-2.5 transition-all"
             >
               View all <ArrowRight className="w-4 h-4" />
             </Link>
@@ -363,7 +441,7 @@ export default function HomePage() {
               <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Be the first to list your property!</p>
               <Link
                 href="/register?role=OWNER"
-                className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700 transition-colors"
+                className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-maroon-600 text-white text-sm rounded-lg hover:bg-maroon-700 transition-colors"
               >
                 List Your Property
               </Link>
@@ -373,11 +451,34 @@ export default function HomePage() {
           <div className="mt-10 text-center md:hidden">
             <Link
               href="/browse"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-medium hover:opacity-90 transition-opacity"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-maroon-600 to-maroon-600 text-white rounded-xl font-medium hover:opacity-90 transition-opacity"
             >
               Browse All Rooms <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
+        </div>
+      </section>
+
+      {/* AI Recommendations */}
+      <section className="py-20 bg-white dark:bg-gray-900">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="flex items-end justify-between mb-10"
+          >
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <Sparkles className="w-5 h-5 text-coral-500" />
+                <span className="text-xs font-semibold uppercase tracking-widest text-coral-500">AI Powered</span>
+              </div>
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Recommended for You</h2>
+              <p className="text-gray-500 dark:text-gray-400 mt-2">Smart suggestions based on your preferences</p>
+            </div>
+          </motion.div>
+
+          <AICardGrid />
         </div>
       </section>
 
@@ -398,7 +499,7 @@ export default function HomePage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
             {/* Connector */}
-            <div className="hidden md:block absolute top-12 left-1/4 right-1/4 h-0.5 bg-gradient-to-r from-indigo-200 to-purple-200 dark:from-indigo-800 dark:to-purple-800" />
+            <div className="hidden md:block absolute top-12 left-1/4 right-1/4 h-0.5 bg-gradient-to-r from-maroon-200 to-maroon-200 dark:from-maroon-800 dark:to-maroon-800" />
 
             {HOW_IT_WORKS.map((step, i) => (
               <motion.div
@@ -414,7 +515,7 @@ export default function HomePage() {
                 >
                   <step.icon className="w-9 h-9 text-white" />
                 </div>
-                <div className="absolute top-0 right-[calc(50%-44px)] translate-x-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-gradient-to-br from-indigo-600 to-purple-600 text-white text-xs font-bold flex items-center justify-center">
+                <div className="absolute top-0 right-[calc(50%-44px)] translate-x-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-gradient-to-br from-maroon-600 to-maroon-600 text-white text-xs font-bold flex items-center justify-center">
                   {step.step}
                 </div>
                 <h3 className="font-bold text-gray-900 dark:text-white text-lg mb-2">{step.title}</h3>
@@ -494,20 +595,20 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="mt-16 rounded-3xl bg-gradient-to-br from-indigo-600 via-purple-600 to-indigo-700 p-8 md:p-12 shadow-xl"
+            className="mt-16 rounded-3xl bg-gradient-to-br from-maroon-600 via-maroon-600 to-maroon-700 p-8 md:p-12 shadow-xl"
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
               {/* Left content */}
               <div className="text-white">
-                <p className="text-sm font-semibold uppercase tracking-widest text-indigo-200 mb-3">Explore More</p>
+                <p className="text-sm font-semibold uppercase tracking-widest text-maroon-200 mb-3">Explore More</p>
                 <h3 className="text-3xl md:text-4xl font-bold mb-4">Discover Rooms Across India</h3>
-                <p className="text-indigo-100 text-lg mb-6 leading-relaxed">
+                <p className="text-maroon-100 text-lg mb-6 leading-relaxed">
                   Browse our complete collection of verified student rooms, PGs, and hostels in all major Indian cities. Find your perfect home away from home.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-3">
                   <Link
                     href="/browse"
-                    className="px-6 py-3 bg-white text-indigo-600 font-semibold rounded-2xl hover:bg-indigo-50 transition-colors shadow-lg flex items-center justify-center gap-2"
+                    className="px-6 py-3 bg-white text-maroon-600 font-semibold rounded-2xl hover:bg-maroon-50 transition-colors shadow-lg flex items-center justify-center gap-2"
                   >
                     <Search className="w-4 h-4" />
                     Browse All Rooms
@@ -593,7 +694,7 @@ export default function HomePage() {
                   &ldquo;{t.text}&rdquo;
                 </p>
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold text-sm">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-maroon-500 to-maroon-500 flex items-center justify-center text-white font-bold text-sm">
                     {t.avatar}
                   </div>
                   <div>
@@ -608,7 +709,7 @@ export default function HomePage() {
       </section>
 
       {/* CTA */}
-      <section className="py-20 bg-gradient-to-br from-indigo-600 via-purple-600 to-indigo-700">
+      <section className="py-20 bg-gradient-to-br from-maroon-600 via-maroon-600 to-maroon-700">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -618,13 +719,13 @@ export default function HomePage() {
             <h2 className="text-4xl font-bold text-white mb-4">
               Ready to Find Your Room?
             </h2>
-            <p className="text-indigo-100 text-lg mb-10 max-w-2xl mx-auto">
-              Join 50,000+ students who found their perfect room on StayFinder. Start your search today.
+            <p className="text-maroon-100 text-lg mb-10 max-w-2xl mx-auto">
+              Join 50,000+ students who found their perfect room on कमरा किराया. Start your search today.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 href="/register?role=STUDENT"
-                className="px-8 py-3.5 bg-white text-indigo-600 font-semibold rounded-xl hover:bg-indigo-50 transition-colors shadow-lg"
+                className="px-8 py-3.5 bg-white text-maroon-600 font-semibold rounded-xl hover:bg-maroon-50 transition-colors shadow-lg"
               >
                 Find a Room
               </Link>
@@ -639,5 +740,6 @@ export default function HomePage() {
         </div>
       </section>
     </div>
+    
   );
 }

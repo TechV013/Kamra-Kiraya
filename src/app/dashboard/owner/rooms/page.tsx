@@ -45,7 +45,7 @@ export default function OwnerRoomsPage() {
           <button
             type="button"
             onClick={() => router.push("/dashboard/owner/add-room")}
-            className="rounded-2xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white hover:bg-indigo-500"
+            className="rounded-2xl bg-maroon-600 px-5 py-3 text-sm font-semibold text-white hover:bg-maroon-500"
           >
             Add new room
           </button>
@@ -93,7 +93,7 @@ export default function OwnerRoomsPage() {
                       <Link href={`/dashboard/owner/edit-room/${room.id}`} className="rounded-2xl border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800 transition">
                         Edit listing
                       </Link>
-                      <Link href={`/rooms/${room.id}`} className="rounded-2xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 transition">
+                      <Link href={`/rooms/${room.id}`} className="rounded-2xl bg-maroon-600 px-4 py-2 text-sm font-semibold text-white hover:bg-maroon-500 transition">
                         View listing
                       </Link>
                     </div>

@@ -2,7 +2,7 @@
 
 export type Role = "STUDENT" | "OWNER" | "ADMIN";
 export type BookingStatus = "PENDING" | "CONFIRMED" | "REJECTED" | "CANCELLED" | "COMPLETED";
-export type PaymentStatus = "PENDING" | "SUCCEEDED" | "FAILED" | "REFUNDED";
+export type PaymentStatus = "PENDING" | "SUCCEEDED" | "FAILED" | "REFUNDED" | "VERIFICATION_PENDING";
 export type RoomType = "SINGLE" | "DOUBLE" | "TRIPLE" | "DORMITORY" | "STUDIO" | "APARTMENT";
 export type BookingType = "DAILY" | "MONTHLY";
 export type PropertyStatus = "PENDING" | "APPROVED" | "REJECTED" | "INACTIVE";
