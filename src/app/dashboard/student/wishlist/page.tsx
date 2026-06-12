@@ -70,7 +70,7 @@ export default function StudentWishlistPage() {
           <button
             type="button"
             onClick={() => router.push("/browse")}
-            className="rounded-2xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white hover:bg-indigo-500"
+            className="rounded-2xl bg-maroon-600 px-5 py-3 text-sm font-semibold text-white hover:bg-maroon-500"
           >
             Continue browsing
           </button>

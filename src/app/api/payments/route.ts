@@ -1,7 +1,8 @@
 import crypto from "crypto";
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAuth, apiError, apiResponse } from "@/lib/api-helpers";
+import { requireAuth, apiError, apiResponse, validateBody } from "@/lib/api-helpers";
+import { paymentSchema } from "@/lib/validations";
 
 const isQrPaymentConfigured = () => {
   return (
@@ -67,11 +68,10 @@ export async function POST(req: NextRequest) {
       return apiError("QR payment gateway is not configured. Please contact support.", 503);
     }
 
-    const { bookingId } = await req.json();
+    const { data, errorResponse } = await validateBody(req, paymentSchema);
+    if (errorResponse) return errorResponse;
 
-    if (!bookingId) {
-      return apiError("Booking ID is required");
-    }
+    const { bookingId } = data!;
 
     const booking = await prisma.booking.findUnique({
       where: { id: bookingId },

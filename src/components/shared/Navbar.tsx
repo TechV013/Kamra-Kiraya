@@ -64,19 +64,17 @@ export default function Navbar() {
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled
-          ? "bg-white/90 dark:bg-gray-900/90 backdrop-blur-md shadow-md"
-          : "bg-white/70 dark:bg-gray-900/70 backdrop-blur-sm"
+        scrolled ? "glass shadow-md" : "glass"
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center group-hover:scale-105 transition-transform">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-maroon-600 to-maroon-600 flex items-center justify-center group-hover:scale-105 transition-transform">
               <span className="text-white font-bold text-sm">कK</span>
             </div>
-            <span className="font-bold text-xl bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+            <span className="font-bold text-xl bg-gradient-to-r from-maroon-600 to-maroon-600 bg-clip-text text-transparent">
               कमरा किराया
             </span>
           </Link>
@@ -89,7 +87,7 @@ export default function Navbar() {
                 href={link.href}
                 className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                   pathname === link.href
-                    ? "bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400"
+                    ? "bg-maroon-50 dark:bg-maroon-950/50 text-maroon-600 dark:text-maroon-400"
                     : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
                 }`}
               >
@@ -126,7 +124,7 @@ export default function Navbar() {
                     onClick={() => setUserMenuOpen((p) => !p)}
                     className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                   >
-                    <div className="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white text-xs font-semibold">
+                    <div className="w-7 h-7 rounded-full bg-gradient-to-br from-maroon-500 to-maroon-500 flex items-center justify-center text-white text-xs font-semibold">
                       {user.name.charAt(0).toUpperCase()}
                     </div>
                     <span className="hidden md:block text-sm font-medium text-gray-700 dark:text-gray-200 max-w-[100px] truncate">
@@ -142,12 +140,12 @@ export default function Navbar() {
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: -8, scale: 0.95 }}
                         transition={{ duration: 0.15 }}
-                        className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-900 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden"
+                        className="absolute right-0 mt-2 w-56 glass-card rounded-xl overflow-hidden"
                       >
                         <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700">
                           <p className="text-sm font-semibold text-gray-900 dark:text-white">{user.name}</p>
                           <p className="text-xs text-gray-500 dark:text-gray-400">{user.email}</p>
-                          <span className="inline-flex mt-1 items-center px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300">
+                          <span className="inline-flex mt-1 items-center px-2 py-0.5 rounded-full text-xs font-medium bg-maroon-100 dark:bg-maroon-900 text-maroon-700 dark:text-maroon-300">
                             {user.role}
                           </span>
                         </div>
@@ -157,7 +155,7 @@ export default function Navbar() {
                             onClick={() => setUserMenuOpen(false)}
                             className="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800"
                           >
-                            <LayoutDashboard className="w-4 h-4 text-indigo-500" />
+                            <LayoutDashboard className="w-4 h-4 text-maroon-500" />
                             Dashboard
                           </Link>
                           {user.role === "STUDENT" && (
@@ -203,7 +201,7 @@ export default function Navbar() {
                 </Link>
                 <Link
                   href="/register"
-                  className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-indigo-600 to-purple-600 rounded-lg hover:opacity-90 transition-opacity shadow-sm"
+                  className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-maroon-600 to-maroon-600 rounded-lg hover:opacity-90 transition-opacity shadow-sm"
                 >
                   Get Started
                 </Link>
@@ -238,7 +236,7 @@ export default function Navbar() {
                   onClick={() => setMobileOpen(false)}
                   className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                     pathname === link.href
-                      ? "bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600"
+                      ? "bg-maroon-50 dark:bg-maroon-950/50 text-maroon-600"
                       : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
                   }`}
                 >
@@ -276,7 +274,7 @@ export default function Navbar() {
                   <Link
                     href="/register"
                     onClick={() => setMobileOpen(false)}
-                    className="flex-1 text-center px-4 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-indigo-600 to-purple-600 rounded-lg"
+                    className="flex-1 text-center px-4 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-maroon-600 to-maroon-600 rounded-lg"
                   >
                     Get Started
                   </Link>

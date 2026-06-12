@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAuth, apiError, apiResponse } from "@/lib/api-helpers";
+import { requireAuth, apiError, apiResponse, validateBody } from "@/lib/api-helpers";
+import { bookingSchema } from "@/lib/validations";
 import { differenceInDays, isValid } from "date-fns";
 
 // GET /api/bookings - student's bookings
@@ -35,22 +36,13 @@ export async function POST(req: NextRequest) {
   if (error) return error;
 
   try {
-    const { roomId, checkIn, checkOut, bookingType, specialNote } = await req.json();
+    const { data, errorResponse } = await validateBody(req, bookingSchema);
+    if (errorResponse) return errorResponse;
 
-    if (!roomId || !checkIn || !checkOut || !bookingType) {
-      return apiError("Required fields missing");
-    }
-
-    if (!["DAILY", "MONTHLY"].includes(bookingType)) {
-      return apiError("Invalid booking type");
-    }
+    const { roomId, checkIn, checkOut, bookingType, specialNote } = data!;
 
     const checkInDate = new Date(checkIn);
     const checkOutDate = new Date(checkOut);
-
-    if (!isValid(checkInDate) || !isValid(checkOutDate)) {
-      return apiError("Invalid check-in or check-out date");
-    }
 
     if (checkInDate >= checkOutDate) {
       return apiError("Check-out must be after check-in");
@@ -64,6 +56,20 @@ export async function POST(req: NextRequest) {
     }
     if (room.status !== "APPROVED") {
       return apiError("Room is not approved for booking");
+    }
+
+    // Check for overlapping confirmed/completed bookings
+    const overlappingBookingsCount = await prisma.booking.count({
+      where: {
+        roomId,
+        status: { in: ["CONFIRMED", "COMPLETED"] },
+        checkIn: { lt: checkOutDate },
+        checkOut: { gt: checkInDate },
+      },
+    });
+
+    if (overlappingBookingsCount >= room.totalRooms) {
+      return apiError("Room is fully booked for the selected dates");
     }
 
     const totalDays = differenceInDays(checkOutDate, checkInDate);

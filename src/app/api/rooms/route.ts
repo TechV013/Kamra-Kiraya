@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireRole, apiError, apiResponse } from "@/lib/api-helpers";
+import { requireRole, apiError, apiResponse, validateBody } from "@/lib/api-helpers";
+import { roomSchema } from "@/lib/validations";
 
 // GET /api/rooms - list rooms with filters
 export async function GET(req: NextRequest) {
@@ -84,7 +85,9 @@ export async function POST(req: NextRequest) {
   if (error) return error;
 
   try {
-    const body = await req.json();
+    const { data, errorResponse } = await validateBody(req, roomSchema);
+    if (errorResponse) return errorResponse;
+
     const {
       title,
       description,
@@ -102,11 +105,7 @@ export async function POST(req: NextRequest) {
       images,
       amenities,
       rules,
-    } = body;
-
-    if (!title || !description || !address || !city || !state || !priceDaily || !priceMonthly) {
-      return apiError("Required fields missing");
-    }
+    } = data!;
 
     const statusValue = process.env.NODE_ENV === "development" ? "APPROVED" : "PENDING";
 
@@ -120,15 +119,15 @@ export async function POST(req: NextRequest) {
         zipCode,
         latitude,
         longitude,
-        priceDaily: parseFloat(priceDaily),
-        priceMonthly: parseFloat(priceMonthly),
-        roomType: roomType || "SINGLE",
-        maxOccupancy: parseInt(maxOccupancy) || 1,
-        totalRooms: parseInt(totalRooms) || 1,
-        availableRooms: parseInt(totalRooms) || 1,
-        images: images || [],
-        amenities: amenities || [],
-        rules: rules || [],
+        priceDaily,
+        priceMonthly,
+        roomType,
+        maxOccupancy,
+        totalRooms,
+        availableRooms: totalRooms,
+        images,
+        amenities,
+        rules,
         ownerId: user!.userId,
         status: statusValue,
       },

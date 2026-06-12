@@ -2,11 +2,14 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Search, Filter, SlidersHorizontal, X, Grid3X3, List, Building2 } from "lucide-react";
+import { Search, Filter, SlidersHorizontal, X, Grid3X3, List, Map as MapIcon, Building2 } from "lucide-react";
 import axios from "axios";
 import type { Room, RoomType } from "@/types";
 import RoomCard from "@/components/rooms/RoomCard";
 import { RoomCardSkeleton } from "@/components/shared/Skeletons";
+import dynamic from "next/dynamic";
+
+const RoomMap = dynamic(() => import("@/components/rooms/RoomMap"), { ssr: false });
 
 const ROOM_TYPES: { value: RoomType | ""; label: string }[] = [
   { value: "", label: "All Types" },
@@ -31,7 +34,7 @@ export default function BrowsePage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [viewMode, setViewMode] = useState<"grid" | "list" | "map">("grid");
 
   // Filter state
   const [search, setSearch] = useState("");
@@ -176,14 +179,14 @@ export default function BrowsePage() {
               onClick={() => setFiltersOpen((p) => !p)}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${
                 filtersOpen || hasFilters
-                  ? "bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300"
+                  ? "bg-maroon-100 dark:bg-maroon-900/40 text-maroon-700 dark:text-maroon-300"
                   : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200"
               }`}
             >
               <SlidersHorizontal className="w-4 h-4" />
               Filters
               {hasFilters && (
-                <span className="w-5 h-5 rounded-full bg-indigo-600 text-white text-xs flex items-center justify-center">
+                <span className="w-5 h-5 rounded-full bg-maroon-600 text-white text-xs flex items-center justify-center">
                   !
                 </span>
               )}
@@ -202,6 +205,12 @@ export default function BrowsePage() {
                 className={`p-1.5 rounded-lg transition-colors ${viewMode === "list" ? "bg-white dark:bg-gray-700 shadow-sm" : "text-gray-400"}`}
               >
                 <List className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => setViewMode("map")}
+                className={`p-1.5 rounded-lg transition-colors ${viewMode === "map" ? "bg-white dark:bg-gray-700 shadow-sm" : "text-gray-400"}`}
+              >
+                <MapIcon className="w-4 h-4" />
               </button>
             </div>
           </div>
@@ -222,7 +231,7 @@ export default function BrowsePage() {
                     onClick={() => setRoomType(t.value)}
                     className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                       roomType === t.value
-                        ? "bg-indigo-600 text-white"
+                        ? "bg-maroon-600 text-white"
                         : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200"
                     }`}
                   >
@@ -239,7 +248,7 @@ export default function BrowsePage() {
                     onClick={() => setBookingType(t.value)}
                     className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                       bookingType === t.value
-                        ? "bg-purple-600 text-white"
+                        ? "bg-maroon-600 text-white"
                         : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200"
                     }`}
                   >
@@ -309,10 +318,14 @@ export default function BrowsePage() {
             <p className="text-gray-500 dark:text-gray-400 text-sm">Try adjusting your search filters</p>
             <button
               onClick={handleReset}
-              className="mt-4 px-5 py-2 bg-indigo-600 text-white text-sm rounded-xl hover:bg-indigo-700 transition-colors"
+              className="mt-4 px-5 py-2 bg-maroon-600 text-white text-sm rounded-xl hover:bg-maroon-700 transition-colors"
             >
               Clear Filters
             </button>
+          </div>
+        ) : viewMode === "map" ? (
+          <div className="h-[600px] rounded-2xl overflow-hidden">
+            <RoomMap rooms={rooms} />
           </div>
         ) : (
           <>
@@ -348,7 +361,7 @@ export default function BrowsePage() {
                         onClick={() => fetchRooms(p)}
                         className={`w-9 h-9 rounded-xl text-sm font-medium transition-colors ${
                           p === page
-                            ? "bg-indigo-600 text-white"
+                            ? "bg-maroon-600 text-white"
                             : "hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300"
                         }`}
                       >

@@ -93,20 +93,43 @@ export async function PATCH(
       return apiError("Forbidden", 403);
     }
 
+    let roomUpdate = undefined;
+
+    if (status === "CONFIRMED" && booking.status !== "CONFIRMED" && booking.status !== "COMPLETED") {
+      // Check for overlapping confirmed/completed bookings right before confirming to prevent race conditions
+      const overlappingBookingsCount = await prisma.booking.count({
+        where: {
+          roomId: booking.roomId,
+          status: { in: ["CONFIRMED", "COMPLETED"] },
+          checkIn: { lt: booking.checkOut },
+          checkOut: { gt: booking.checkIn },
+        },
+      });
+
+      if (overlappingBookingsCount >= booking.room.totalRooms) {
+        return apiError("Cannot confirm booking: room is fully booked for these dates", 400);
+      }
+
+      roomUpdate = {
+        update: {
+          availableRooms: { decrement: 1 },
+          isAvailable: booking.room.availableRooms <= 1 ? false : true,
+        },
+      };
+    } else if (status === "CANCELLED" && (booking.status === "CONFIRMED" || booking.status === "COMPLETED")) {
+      roomUpdate = {
+        update: {
+          availableRooms: { increment: 1 },
+          isAvailable: true,
+        },
+      };
+    }
+
     const updated = await prisma.booking.update({
       where: { id },
       data: {
         status,
-        ...(status === "CONFIRMED"
-          ? {
-              room: {
-                update: {
-                  availableRooms: { decrement: 1 },
-                  isAvailable: booking.room.availableRooms <= 1 ? false : true,
-                },
-              },
-            }
-          : {}),
+        ...(roomUpdate ? { room: roomUpdate } : {}),
       },
       include: { room: true, student: true, payment: true },
     });

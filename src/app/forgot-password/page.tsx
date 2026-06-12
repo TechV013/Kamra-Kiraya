@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import axios from "axios";
 import { Building2, Mail, ArrowRight, CheckCircle } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -15,10 +16,14 @@ export default function ForgotPasswordPage() {
     e.preventDefault();
     if (!email) { toast.error("Please enter your email"); return; }
     setLoading(true);
-    // Simulate sending reset email (backend endpoint not implemented)
-    await new Promise((r) => setTimeout(r, 1500));
-    setSent(true);
-    setLoading(false);
+    try {
+      await axios.post("/api/auth/forgot-password", { email });
+      setSent(true);
+    } catch (err: any) {
+      toast.error(err?.response?.data?.error || "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -29,10 +34,10 @@ export default function ForgotPasswordPage() {
         className="w-full max-w-md bg-white dark:bg-gray-900 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 p-8"
       >
         <div className="flex items-center gap-2 mb-8">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-maroon-600 to-maroon-600 flex items-center justify-center">
             <span className="text-white font-bold text-sm">कK</span>
           </div>
-          <span className="font-bold text-xl bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+          <span className="font-bold text-xl bg-gradient-to-r from-maroon-600 to-maroon-600 bg-clip-text text-transparent">
             कमरा किराया
           </span>
         </div>
@@ -46,7 +51,7 @@ export default function ForgotPasswordPage() {
             <p className="text-gray-500 dark:text-gray-400 mb-6">
               We&apos;ve sent a password reset link to <strong>{email}</strong>
             </p>
-            <Link href="/login" className="text-indigo-600 font-medium hover:underline text-sm">
+            <Link href="/login" className="text-maroon-600 font-medium hover:underline text-sm">
               Back to Sign in
             </Link>
           </div>
@@ -66,20 +71,20 @@ export default function ForgotPasswordPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@example.com"
-                    className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-400 outline-none focus:border-indigo-400 transition-all"
+                    className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-400 outline-none focus:border-maroon-400 transition-all"
                   />
                 </div>
               </div>
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-xl hover:opacity-90 disabled:opacity-50 transition-opacity shadow-md flex items-center justify-center gap-2"
+                className="w-full py-3 bg-gradient-to-r from-maroon-600 to-maroon-600 text-white font-semibold rounded-xl hover:opacity-90 disabled:opacity-50 transition-opacity shadow-md flex items-center justify-center gap-2"
               >
                 {loading ? "Sending..." : <><span>Send Reset Link</span> <ArrowRight className="w-4 h-4" /></>}
               </button>
             </form>
             <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-6">
-              <Link href="/login" className="text-indigo-600 hover:underline">Back to Sign in</Link>
+              <Link href="/login" className="text-maroon-600 hover:underline">Back to Sign in</Link>
             </p>
           </>
         )}

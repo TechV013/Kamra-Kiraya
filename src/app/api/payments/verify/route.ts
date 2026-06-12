@@ -1,42 +1,39 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAuth, apiError, apiResponse } from "@/lib/api-helpers";
+import { requireAuth, apiError, apiResponse, validateBody } from "@/lib/api-helpers";
+import { paymentVerifySchema } from "@/lib/validations";
 
-// POST /api/payments/verify - manually verify QR payment
+const UPI_TXN_REGEX = /^[A-Za-z0-9\-_.]{8,35}$/;
+
+function validateUpiTransactionId(ref: string): string | null {
+  if (!UPI_TXN_REGEX.test(ref)) {
+    return "Transaction ID must be 8-35 characters (letters, numbers, hyphens, underscores, dots)";
+  }
+  const fakePatterns = [
+    /^test/i, /^fake/i, /^dummy/i, /^sample/i, /^example/i,
+    /^123456/, /^abcdef/i, /^000000/, /^111111/,
+    /(.)\1{5,}/,
+    /^[a-z]{6}$/i,
+  ];
+  for (const pattern of fakePatterns) {
+    if (pattern.test(ref)) return "Transaction ID appears to be invalid";
+  }
+  return null;
+}
+
 export async function POST(req: NextRequest) {
   const { error, user } = requireAuth(req);
   if (error) return error;
 
   try {
-    const { paymentId, bookingId, paymentReference } = await req.json();
+    const { data, errorResponse } = await validateBody(req, paymentVerifySchema);
+    if (errorResponse) return errorResponse;
 
-    if (!paymentId || !bookingId || !paymentReference) {
-      return apiError("Payment ID, booking ID, and transaction reference are required");
-    }
+    const { paymentId, bookingId, paymentReference } = data!;
 
-    // Validate UPI transaction reference format
-    const upiTxnRegex = /^[A-Za-z0-9]{8,35}$/;
-    if (!upiTxnRegex.test(paymentReference)) {
-      return apiError("Invalid transaction reference format. UPI transaction IDs are typically 8-35 alphanumeric characters", 400);
-    }
-
-    // Additional validation: should not contain spaces or special characters except allowed ones
-    if (paymentReference.includes(' ') || /[^A-Za-z0-9\-_.]/.test(paymentReference)) {
-      return apiError("Transaction reference contains invalid characters", 400);
-    }
-
-    // Check for obviously fake/test transaction IDs
-    const fakePatterns = [
-      /^test/i,
-      /^fake/i,
-      /^dummy/i,
-      /^123456/,
-      /^abcdef/i,
-      /(.)\1{5,}/  // repeated characters
-    ];
-
-    if (fakePatterns.some(pattern => pattern.test(paymentReference))) {
-      return apiError("Transaction reference appears to be invalid or test data", 400);
+    const validationError = validateUpiTransactionId(paymentReference);
+    if (validationError) {
+      return apiError(validationError, 400);
     }
 
     const payment = await prisma.payment.findUnique({
@@ -71,32 +68,38 @@ export async function POST(req: NextRequest) {
     const existingReference = await prisma.payment.findFirst({
       where: {
         paymentReference,
-        status: { in: ["SUCCEEDED", "PENDING"] },
+        status: { in: ["SUCCEEDED", "PENDING", "VERIFICATION_PENDING"] },
       },
     });
 
     if (existingReference && existingReference.id !== paymentId) {
-      console.log(`Payment verification failed: Transaction reference ${paymentReference} already used for payment ${existingReference.id}`);
-      return apiError("This transaction reference has already been used or is pending verification", 400);
+      return apiError("This transaction reference has already been used", 400);
     }
 
     await prisma.payment.update({
       where: { id: paymentId },
       data: {
-        status: "SUCCEEDED",
+        status: "VERIFICATION_PENDING",
         paymentReference,
-        razorpayPaymentId: paymentReference,
       },
     });
 
-    await prisma.booking.update({
-      where: { id: bookingId },
-      data: { status: "COMPLETED" },
+    await prisma.notification.create({
+      data: {
+        userId: payment.booking.studentId,
+        title: "Payment Submitted",
+        message: `Your payment of ₹${payment.amount.toLocaleString()} is pending verification. You will be notified once verified.`,
+        type: "info",
+      },
     });
 
-    console.log(`Payment verified successfully: Payment ${paymentId} for booking ${bookingId} with transaction ${paymentReference}`);
+    console.log(`Payment submitted for verification: Payment ${paymentId} for booking ${bookingId} with transaction ${paymentReference}`);
 
-    return apiResponse({ success: true, message: "Payment verified and booking completed successfully" });
+    return apiResponse({
+      success: true,
+      message: "Payment submitted for verification. Your booking will be confirmed once the owner verifies your payment.",
+      status: "VERIFICATION_PENDING",
+    });
   } catch (err) {
     console.error("Payment verification error:", err);
     return apiError("Internal server error", 500);

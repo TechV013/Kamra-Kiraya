@@ -9,7 +9,7 @@ export default function Footer() {
           {/* Brand */}
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-maroon-500 to-maroon-600 flex items-center justify-center">
                 <span className="text-white font-bold text-sm">कK</span>
               </div>
               <span className="font-bold text-xl text-white">कमरा किराया</span>
@@ -22,7 +22,7 @@ export default function Footer() {
                 <a
                   key={i}
                   href="#"
-                  className="w-8 h-8 rounded-lg bg-gray-800 flex items-center justify-center text-gray-400 hover:text-white hover:bg-indigo-600 transition-all"
+                  className="w-8 h-8 rounded-lg bg-gray-800 flex items-center justify-center text-gray-400 hover:text-white hover:bg-maroon-600 transition-all"
                 >
                   <Icon className="w-4 h-4" />
                 </a>
@@ -75,17 +75,17 @@ export default function Footer() {
             <h3 className="text-white font-semibold mb-4">Contact Us</h3>
             <ul className="space-y-3">
               <li className="flex items-start gap-2.5">
-                <MapPin className="w-4 h-4 text-indigo-400 mt-0.5 shrink-0" />
+                <MapPin className="w-4 h-4 text-maroon-400 mt-0.5 shrink-0" />
                 <span className="text-sm text-gray-400">123 Student Hub, College Road, Delhi, India - 110001</span>
               </li>
               <li className="flex items-center gap-2.5">
-                <Mail className="w-4 h-4 text-indigo-400 shrink-0" />
+                <Mail className="w-4 h-4 text-maroon-400 shrink-0" />
                 <a href="mailto:support@kamarakiraya.in" className="text-sm text-gray-400 hover:text-white transition-colors">
                   support@kamarakiraya.in
                 </a>
               </li>
               <li className="flex items-center gap-2.5">
-                <Phone className="w-4 h-4 text-indigo-400 shrink-0" />
+                <Phone className="w-4 h-4 text-maroon-400 shrink-0" />
                 <a href="tel:+911800000000" className="text-sm text-gray-400 hover:text-white transition-colors">
                   +91 1800-000-0000
                 </a>

@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import {
   MapPin, Star, Users, Wifi, Car, Coffee, Tv, Dumbbell,
   Phone, Mail, ChevronLeft, ChevronRight, Heart, Share2,
-  CheckCircle, Calendar, Bed, Shield, Clock
+  CheckCircle, Calendar, Bed, Shield, Clock, Sparkles
 } from "lucide-react";
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -14,6 +14,8 @@ import Link from "next/link";
 import type { Room, Review } from "@/types";
 import { useAuthStore } from "@/store/authStore";
 import { useWishlistStore } from "@/store/uiStore";
+import RoomCard from "@/components/rooms/RoomCard";
+import { RoomCardSkeleton } from "@/components/shared/Skeletons";
 
 const AMENITY_ICONS: Record<string, React.ReactNode> = {
   WiFi: <Wifi className="w-4 h-4" />,
@@ -50,9 +52,12 @@ export default function RoomDetailPage() {
     status: string;
   } | null>(null);
   const [verifyingPayment, setVerifyingPayment] = useState(false);
+  const [txRef, setTxRef] = useState("");
+  const [showTxDialog, setShowTxDialog] = useState(false);
   const [reviewText, setReviewText] = useState("");
   const [reviewRating, setReviewRating] = useState(5);
   const [submittingReview, setSubmittingReview] = useState(false);
+  const [similarRooms, setSimilarRooms] = useState<Room[]>([]);
 
   const wishlisted = isWishlisted(id);
 
@@ -63,7 +68,10 @@ export default function RoomDetailPage() {
       .catch(() => toast.error("Room not found"))
       .finally(() => setLoading(false));
 
-    // No external payment script required for QR payment
+    axios
+      .get(`/api/recommendations?roomId=${id}&limit=4`)
+      .then((r) => setSimilarRooms(r.data.rooms || []))
+      .catch(() => {});
   }, [id]);
 
   const handleBook = async () => {
@@ -114,20 +122,30 @@ export default function RoomDetailPage() {
       toast.error("Unable to verify payment");
       return;
     }
+    if (!txRef || txRef.length < 8) {
+      toast.error("Please enter a valid transaction ID (at least 8 characters)");
+      return;
+    }
 
     setVerifyingPayment(true);
     try {
-      await axios.post(
+      const res = await axios.post(
         "/api/payments/verify",
         {
           paymentId: paymentSession.paymentId,
           bookingId: paymentSession.bookingId,
-          paymentReference: `manual-${Date.now()}`,
+          paymentReference: txRef,
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      toast.success("Payment confirmed and booking completed.");
+      if (res.data.status === "VERIFICATION_PENDING") {
+        toast.success("Payment submitted! Waiting for owner verification.");
+      } else {
+        toast.success("Payment confirmed and booking completed.");
+      }
+      setShowTxDialog(false);
+      setTxRef("");
       router.push("/dashboard/student");
     } catch (err: any) {
       toast.error(err?.response?.data?.error || "Payment confirmation failed");
@@ -203,7 +221,7 @@ export default function RoomDetailPage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Room not found</h2>
-          <Link href="/browse" className="mt-3 inline-block text-indigo-600">Browse Rooms</Link>
+          <Link href="/browse" className="mt-3 inline-block text-maroon-600">Browse Rooms</Link>
         </div>
       </div>
     );
@@ -218,9 +236,9 @@ export default function RoomDetailPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-6">
-          <Link href="/browse" className="hover:text-indigo-600 transition-colors">Browse</Link>
+          <Link href="/browse" className="hover:text-maroon-600 transition-colors">Browse</Link>
           <span>/</span>
-          <Link href={`/browse?city=${room.city}`} className="hover:text-indigo-600 transition-colors">{room.city}</Link>
+          <Link href={`/browse?city=${room.city}`} className="hover:text-maroon-600 transition-colors">{room.city}</Link>
           <span>/</span>
           <span className="text-gray-900 dark:text-white line-clamp-1">{room.title}</span>
         </div>
@@ -284,7 +302,7 @@ export default function RoomDetailPage() {
                     key={i}
                     onClick={() => setImgIdx(i)}
                     className={`shrink-0 w-20 h-16 rounded-xl overflow-hidden border-2 transition-all ${
-                      i === imgIdx ? "border-indigo-500" : "border-transparent opacity-60 hover:opacity-100"
+                      i === imgIdx ? "border-maroon-500" : "border-transparent opacity-60 hover:opacity-100"
                     }`}
                   >
                     <img
@@ -306,7 +324,7 @@ export default function RoomDetailPage() {
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300">
+                    <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-maroon-100 dark:bg-maroon-900/50 text-maroon-700 dark:text-maroon-300">
                       {room.roomType}
                     </span>
                     <span
@@ -345,7 +363,7 @@ export default function RoomDetailPage() {
                   </button>
                   <button
                     onClick={() => { navigator.clipboard.writeText(window.location.href); toast.success("Link copied!"); }}
-                    className="w-10 h-10 rounded-xl border border-gray-200 dark:border-gray-700 flex items-center justify-center hover:border-indigo-400 transition-colors"
+                    className="w-10 h-10 rounded-xl border border-gray-200 dark:border-gray-700 flex items-center justify-center hover:border-maroon-400 transition-colors"
                   >
                     <Share2 className="w-5 h-5 text-gray-400" />
                   </button>
@@ -362,7 +380,7 @@ export default function RoomDetailPage() {
                 { icon: Shield, label: "Verified", value: room.status === "APPROVED" ? "Yes" : "Pending" },
               ].map((stat) => (
                 <div key={stat.label} className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-100 dark:border-gray-700 text-center">
-                  <stat.icon className="w-5 h-5 text-indigo-500 mx-auto mb-1.5" />
+                  <stat.icon className="w-5 h-5 text-maroon-500 mx-auto mb-1.5" />
                   <p className="text-xs text-gray-500 dark:text-gray-400">{stat.label}</p>
                   <p className="text-sm font-semibold text-gray-900 dark:text-white mt-0.5">{stat.value}</p>
                 </div>
@@ -382,7 +400,7 @@ export default function RoomDetailPage() {
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {room.amenities.map((a) => (
                     <div key={a} className="flex items-center gap-2.5 p-3 rounded-xl bg-gray-50 dark:bg-gray-700">
-                      <div className="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                      <div className="w-8 h-8 rounded-lg bg-maroon-100 dark:bg-maroon-900/50 flex items-center justify-center text-maroon-600 dark:text-maroon-400">
                         {AMENITY_ICONS[a] || <CheckCircle className="w-4 h-4" />}
                       </div>
                       <span className="text-sm text-gray-700 dark:text-gray-200 font-medium">{a}</span>
@@ -399,7 +417,7 @@ export default function RoomDetailPage() {
                 <ul className="space-y-2">
                   {room.rules.map((rule) => (
                     <li key={rule} className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                      <CheckCircle className="w-4 h-4 text-indigo-500 shrink-0" />
+                      <CheckCircle className="w-4 h-4 text-maroon-500 shrink-0" />
                       {rule}
                     </li>
                   ))}
@@ -412,7 +430,7 @@ export default function RoomDetailPage() {
               <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-100 dark:border-gray-700">
                 <h2 className="font-bold text-gray-900 dark:text-white text-lg mb-4">About the Owner</h2>
                 <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold text-xl">
+                  <div className="w-14 h-14 rounded-full bg-gradient-to-br from-maroon-500 to-maroon-500 flex items-center justify-center text-white font-bold text-xl">
                     {room.owner.name.charAt(0)}
                   </div>
                   <div>
@@ -423,7 +441,7 @@ export default function RoomDetailPage() {
                     {(room.owner as any).phone && (
                       <a
                         href={`tel:${(room.owner as any).phone}`}
-                        className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-600 text-sm text-gray-700 dark:text-gray-200 hover:border-indigo-400 transition-colors"
+                        className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-600 text-sm text-gray-700 dark:text-gray-200 hover:border-maroon-400 transition-colors"
                       >
                         <Phone className="w-4 h-4" />
                         Call
@@ -432,7 +450,7 @@ export default function RoomDetailPage() {
                     {(room.owner as any).email && (
                       <a
                         href={`mailto:${(room.owner as any).email}`}
-                        className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-600 text-sm text-gray-700 dark:text-gray-200 hover:border-indigo-400 transition-colors"
+                        className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-600 text-sm text-gray-700 dark:text-gray-200 hover:border-maroon-400 transition-colors"
                       >
                         <Mail className="w-4 h-4" />
                         Email
@@ -465,12 +483,12 @@ export default function RoomDetailPage() {
                     onChange={(e) => setReviewText(e.target.value)}
                     placeholder="Share your experience..."
                     rows={3}
-                    className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-400 outline-none border border-gray-200 dark:border-gray-600 focus:border-indigo-400 transition-colors resize-none"
+                    className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-400 outline-none border border-gray-200 dark:border-gray-600 focus:border-maroon-400 transition-colors resize-none"
                   />
                   <button
                     onClick={handleReview}
                     disabled={submittingReview}
-                    className="mt-2 px-5 py-2 bg-indigo-600 text-white text-sm rounded-xl font-medium hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+                    className="mt-2 px-5 py-2 bg-maroon-600 text-white text-sm rounded-xl font-medium hover:bg-maroon-700 disabled:opacity-50 transition-colors"
                   >
                     {submittingReview ? "Submitting..." : "Submit Review"}
                   </button>
@@ -482,7 +500,7 @@ export default function RoomDetailPage() {
                 <div className="space-y-4">
                   {(room as any).reviews.map((review: Review & { user: { name: string; avatar?: string } }) => (
                     <div key={review.id} className="flex gap-4 pb-4 border-b border-gray-100 dark:border-gray-700 last:border-0">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-400 to-purple-400 flex items-center justify-center text-white text-sm font-bold shrink-0">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-maroon-400 to-maroon-400 flex items-center justify-center text-white text-sm font-bold shrink-0">
                         {review.user?.name?.charAt(0) || "?"}
                       </div>
                       <div>
@@ -513,12 +531,12 @@ export default function RoomDetailPage() {
             <div className="sticky top-24">
               <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-lg overflow-hidden">
                 {/* Price Header */}
-                <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-5 text-white">
+                <div className="bg-gradient-to-r from-maroon-600 to-maroon-600 p-5 text-white">
                   <div className="flex items-end gap-2">
                     <span className="text-3xl font-bold">₹{room.priceMonthly.toLocaleString()}</span>
-                    <span className="text-indigo-100 mb-1">/month</span>
+                    <span className="text-maroon-100 mb-1">/month</span>
                   </div>
-                  <p className="text-indigo-100 text-sm mt-1">
+                  <p className="text-maroon-100 text-sm mt-1">
                     or ₹{room.priceDaily.toLocaleString()}/day
                   </p>
                 </div>
@@ -536,7 +554,7 @@ export default function RoomDetailPage() {
                           onClick={() => setBookingType(t)}
                           className={`py-2.5 rounded-xl text-sm font-medium transition-colors ${
                             bookingType === t
-                              ? "bg-indigo-600 text-white"
+                              ? "bg-maroon-600 text-white"
                               : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200"
                           }`}
                         >
@@ -557,7 +575,7 @@ export default function RoomDetailPage() {
                         value={checkIn}
                         min={new Date().toISOString().split("T")[0]}
                         onChange={(e) => setCheckIn(e.target.value)}
-                        className="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-700 rounded-xl text-sm text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600 outline-none focus:border-indigo-400 transition-colors"
+                        className="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-700 rounded-xl text-sm text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600 outline-none focus:border-maroon-400 transition-colors"
                       />
                     </div>
                     <div>
@@ -569,7 +587,7 @@ export default function RoomDetailPage() {
                         value={checkOut}
                         min={checkIn || new Date().toISOString().split("T")[0]}
                         onChange={(e) => setCheckOut(e.target.value)}
-                        className="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-700 rounded-xl text-sm text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600 outline-none focus:border-indigo-400 transition-colors"
+                        className="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-700 rounded-xl text-sm text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600 outline-none focus:border-maroon-400 transition-colors"
                       />
                     </div>
                   </div>
@@ -584,16 +602,16 @@ export default function RoomDetailPage() {
                       onChange={(e) => setSpecialNote(e.target.value)}
                       placeholder="Any special requirements..."
                       rows={2}
-                      className="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-700 rounded-xl text-sm text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600 outline-none focus:border-indigo-400 transition-colors resize-none placeholder-gray-400"
+                      className="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-700 rounded-xl text-sm text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600 outline-none focus:border-maroon-400 transition-colors resize-none placeholder-gray-400"
                     />
                   </div>
 
                   {/* Price breakdown */}
                   {checkIn && checkOut && (
-                    <div className="bg-indigo-50 dark:bg-indigo-950/30 rounded-xl p-3 space-y-1.5">
+                    <div className="bg-maroon-50 dark:bg-maroon-950/30 rounded-xl p-3 space-y-1.5">
                       <div className="flex justify-between text-sm">
                         <span className="text-gray-600 dark:text-gray-300">Total estimate</span>
-                        <span className="font-bold text-indigo-600 dark:text-indigo-400">₹{totalAmount().toLocaleString()}</span>
+                        <span className="font-bold text-maroon-600 dark:text-maroon-400">₹{totalAmount().toLocaleString()}</span>
                       </div>
                     </div>
                   )}
@@ -601,13 +619,13 @@ export default function RoomDetailPage() {
                   <button
                     onClick={handleBook}
                     disabled={booking || !room.isAvailable || !!paymentSession}
-                    className="w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-xl hover:opacity-90 disabled:opacity-50 transition-opacity shadow-md"
+                    className="w-full py-3 bg-gradient-to-r from-maroon-600 to-maroon-600 text-white font-semibold rounded-xl hover:opacity-90 disabled:opacity-50 transition-opacity shadow-md"
                   >
                     {booking ? "Booking..." : paymentSession ? "Payment pending" : !room.isAvailable ? "Not Available" : "Book Now"}
                   </button>
 
                   {paymentSession && (
-                    <div className="rounded-3xl border border-indigo-100 dark:border-indigo-900 bg-white dark:bg-gray-900 p-5 mt-4 space-y-4">
+                    <div className="rounded-3xl border border-maroon-100 dark:border-maroon-900 bg-white dark:bg-gray-900 p-5 mt-4 space-y-4">
                       <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Pay with QR code</h3>
                       <p className="text-sm text-gray-600 dark:text-gray-300">Scan with any UPI app or payment app and pay the exact amount.</p>
                       <div className="grid place-items-center">
@@ -623,11 +641,11 @@ export default function RoomDetailPage() {
                         <p><strong>Payee:</strong> {paymentSession.payeeName}</p>
                       </div>
                       <button
-                        onClick={verifyPayment}
+                        onClick={() => setShowTxDialog(true)}
                         disabled={verifyingPayment}
                         className="w-full py-3 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-500 disabled:opacity-50 transition-colors"
                       >
-                        {verifyingPayment ? "Confirming payment..." : "I have paid"}
+                        I have paid
                       </button>
                       <p className="text-xs text-gray-500 dark:text-gray-400">Tap confirm only after completing the payment in your app.</p>
                     </div>
@@ -635,7 +653,7 @@ export default function RoomDetailPage() {
 
                   {!user && (
                     <p className="text-center text-xs text-gray-500 dark:text-gray-400">
-                      <Link href="/login" className="text-indigo-600 hover:underline">Sign in</Link> to book this room
+                      <Link href="/login" className="text-maroon-600 hover:underline">Sign in</Link> to book this room
                     </p>
                   )}
 
@@ -648,7 +666,61 @@ export default function RoomDetailPage() {
             </div>
           </div>
         </div>
+
+        {similarRooms.length > 0 && (
+          <section className="mt-16">
+            <div className="flex items-center gap-2 mb-8">
+              <Sparkles className="w-5 h-5 text-coral-500" />
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Similar Rooms</h2>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {similarRooms.map((room, i) => (
+                <RoomCard key={room.id} room={room} index={i} />
+              ))}
+            </div>
+          </section>
+        )}
       </div>
+
+      {/* Transaction ID Dialog */}
+      {showTxDialog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white">Enter Transaction ID</h3>
+              <button onClick={() => setShowTxDialog(false)} className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              After completing the UPI payment, enter the transaction ID from your payment app.
+            </p>
+            <input
+              type="text"
+              value={txRef}
+              onChange={(e) => setTxRef(e.target.value)}
+              placeholder="e.g. 412345678901"
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-sm outline-none focus:border-maroon-400 focus:ring-1 focus:ring-maroon-400"
+            />
+            <p className="text-xs text-gray-400">8-35 characters. Found in your UPI app under transaction details.</p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowTxDialog(false)}
+                className="flex-1 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={verifyPayment}
+                disabled={verifyingPayment || txRef.length < 8}
+                className="flex-1 py-2.5 rounded-xl bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-500 disabled:opacity-50 transition-colors"
+              >
+                {verifyingPayment ? "Verifying..." : "Submit"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

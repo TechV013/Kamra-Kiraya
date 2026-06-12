@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { Heart, MapPin, Star, Users, Wifi, Car, Coffee } from "lucide-react";
@@ -56,6 +57,7 @@ export default function RoomCard({ room, index = 0 }: RoomCardProps) {
 
   const fallbackImage = "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=600&q=80";
   const imageUrl = room.images?.[0] || fallbackImage;
+  const [imgError, setImgError] = useState(false);
 
   return (
     <motion.div
@@ -66,21 +68,19 @@ export default function RoomCard({ room, index = 0 }: RoomCardProps) {
       className="group"
     >
       <Link href={`/rooms/${room.id}`}>
-        <div className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all duration-300">
+        <div className="glass-card rounded-2xl overflow-hidden hover-lift">
           {/* Image */}
           <div className="relative overflow-hidden h-52">
             <img
-              src={imageUrl}
+              src={imgError ? fallbackImage : imageUrl}
               alt={room.title}
               loading="lazy"
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = fallbackImage;
-              }}
+              onError={() => setImgError(true)}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
             {/* Badge */}
             <div className="absolute top-3 left-3">
-              <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-600 text-white shadow">
+              <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-maroon-600 text-white shadow">
                 {room.roomType}
               </span>
             </div>
@@ -112,7 +112,7 @@ export default function RoomCard({ room, index = 0 }: RoomCardProps) {
           {/* Content */}
           <div className="p-4">
             <div className="flex items-start justify-between gap-2 mb-2">
-              <h3 className="font-semibold text-gray-900 dark:text-white text-sm leading-tight line-clamp-1 group-hover:text-indigo-600 transition-colors">
+              <h3 className="font-semibold text-gray-900 dark:text-white text-sm leading-tight line-clamp-1 group-hover:text-maroon-600 transition-colors">
                 {room.title}
               </h3>
               {room.rating > 0 && (
@@ -154,7 +154,7 @@ export default function RoomCard({ room, index = 0 }: RoomCardProps) {
 
             <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-700">
               <div>
-                <span className="text-lg font-bold text-indigo-600 dark:text-indigo-400">
+                <span className="text-lg font-bold text-maroon-600 dark:text-maroon-400">
                   ₹{room.priceMonthly.toLocaleString()}
                 </span>
                 <span className="text-xs text-gray-500 dark:text-gray-400">/month</span>

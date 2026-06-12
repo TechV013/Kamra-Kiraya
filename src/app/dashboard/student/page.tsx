@@ -21,6 +21,13 @@ const STATUS_COLORS: Record<string, string> = {
   COMPLETED: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",
 };
 
+const PAYMENT_STATUS_COLORS: Record<string, string> = {
+  PENDING: "bg-gray-100 text-gray-600",
+  VERIFICATION_PENDING: "bg-yellow-100 text-yellow-700",
+  SUCCEEDED: "bg-green-100 text-green-700",
+  FAILED: "bg-red-100 text-red-700",
+};
+
 const STUDENT_FALLBACK_IMAGE = "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=200&q=80";
 
 export default function StudentDashboard() {
@@ -109,7 +116,7 @@ export default function StudentDashboard() {
             </div>
             <Link
               href="/browse"
-              className="hidden sm:flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-sm font-medium rounded-xl hover:opacity-90 transition-opacity"
+              className="hidden sm:flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-maroon-600 to-maroon-600 text-white text-sm font-medium rounded-xl hover:opacity-90 transition-opacity"
             >
               <Search className="w-4 h-4" />
               Browse Rooms
@@ -122,7 +129,7 @@ export default function StudentDashboard() {
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           {[
-            { label: "Total Bookings", value: stats.total, icon: BookOpen, bg: "bg-indigo-100 dark:bg-indigo-900/30", text: "text-indigo-600 dark:text-indigo-400" },
+            { label: "Total Bookings", value: stats.total, icon: BookOpen, bg: "bg-maroon-100 dark:bg-maroon-900/30", text: "text-maroon-600 dark:text-maroon-400" },
             { label: "Active", value: stats.active, icon: CheckCircle, bg: "bg-green-100 dark:bg-green-900/30", text: "text-green-600 dark:text-green-400" },
             { label: "Pending", value: stats.pending, icon: Clock, bg: "bg-yellow-100 dark:bg-yellow-900/30", text: "text-yellow-600 dark:text-yellow-400" },
             { label: "Cancelled", value: stats.cancelled, icon: XCircle, bg: "bg-red-100 dark:bg-red-900/30", text: "text-red-600 dark:text-red-400" },
@@ -146,7 +153,7 @@ export default function StudentDashboard() {
         {/* Quick Links */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
           {[
-            { href: "/browse", icon: Search, label: "Browse Rooms", desc: "Find your next home", color: "from-indigo-500 to-indigo-600" },
+            { href: "/browse", icon: Search, label: "Browse Rooms", desc: "Find your next home", color: "from-maroon-500 to-maroon-600" },
             { href: "/dashboard/student/wishlist", icon: Heart, label: "My Wishlist", desc: "Saved rooms", color: "from-rose-500 to-pink-600" },
             { href: "/dashboard/student/payments", icon: CreditCard, label: "Payments", desc: "View QR & history", color: "from-emerald-500 to-teal-600" },
           ].map((link) => (
@@ -190,7 +197,7 @@ export default function StudentDashboard() {
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Browse rooms and make your first booking</p>
               <Link
                 href="/browse"
-                className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white text-sm rounded-xl hover:bg-indigo-700 transition-colors"
+                className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 bg-maroon-600 text-white text-sm rounded-xl hover:bg-maroon-700 transition-colors"
               >
                 <Search className="w-4 h-4" /> Browse Rooms
               </Link>
@@ -221,7 +228,7 @@ export default function StudentDashboard() {
                         <div>
                           <Link
                             href={`/rooms/${booking.roomId}`}
-                            className="font-semibold text-gray-900 dark:text-white hover:text-indigo-600 transition-colors text-sm"
+                            className="font-semibold text-gray-900 dark:text-white hover:text-maroon-600 transition-colors text-sm"
                           >
                             {booking.room?.title}
                           </Link>
@@ -277,6 +284,11 @@ export default function StudentDashboard() {
                         >
                           {payingBookingId === booking.id ? "Processing..." : "Pay Now"}
                         </button>
+                      )}
+                      {booking.payment && booking.payment.status === "VERIFICATION_PENDING" && (
+                        <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-700">
+                          Payment Under Review
+                        </span>
                       )}
                     </div>
                   </div>

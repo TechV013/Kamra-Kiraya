@@ -63,14 +63,14 @@ export default function AdminDashboardPage() {
         ) : stats ? (
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 mb-8">
             {[
-              { label: "Total users", value: stats.totalUsers, icon: Users, color: "indigo" },
+              { label: "Total users", value: stats.totalUsers, icon: Users, color: "maroon" },
               { label: "Total rooms", value: stats.totalRooms, icon: Building2, color: "green" },
-              { label: "Active bookings", value: stats.activeBookings, icon: BookOpen, color: "purple" },
+              { label: "Active bookings", value: stats.activeBookings, icon: BookOpen, color: "maroon" },
               { label: "Pending rooms", value: stats.pendingRooms, icon: Shield, color: "yellow" },
               { label: "Revenue", value: `₹${stats.totalRevenue.toLocaleString()}`, icon: DollarSign, color: "blue" },
             ].map((card) => (
               <div key={card.label} className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-100 text-indigo-700 dark:bg-indigo-900/20 dark:text-indigo-200 mb-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-maroon-100 text-maroon-700 dark:bg-maroon-900/20 dark:text-maroon-200 mb-4">
                   <card.icon className="w-5 h-5" />
                 </div>
                 <p className="text-sm text-gray-500 dark:text-gray-400">{card.label}</p>

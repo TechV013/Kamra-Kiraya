@@ -49,7 +49,7 @@ export default function StudentReviewsPage() {
             </div>
             <button
               onClick={() => router.push("/browse")}
-              className="rounded-2xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white hover:bg-indigo-500"
+              className="rounded-2xl bg-maroon-600 px-5 py-3 text-sm font-semibold text-white hover:bg-maroon-500"
             >
               Browse rooms
             </button>
@@ -71,7 +71,7 @@ export default function StudentReviewsPage() {
                       <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{review.room?.title || "Room review"}</h2>
                       <p className="text-sm text-gray-500 dark:text-gray-400">{new Date(review.createdAt).toLocaleDateString()}</p>
                     </div>
-                    <span className="rounded-full bg-indigo-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-indigo-700 dark:bg-indigo-900 dark:text-indigo-200">
+                    <span className="rounded-full bg-maroon-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-maroon-700 dark:bg-maroon-900 dark:text-maroon-200">
                       Rating {review.rating}
                     </span>
                   </div>
