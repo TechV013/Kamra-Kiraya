@@ -630,7 +630,7 @@ export default function RoomDetailPage() {
                       <p className="text-sm text-gray-600 dark:text-gray-300">Scan with any UPI app or payment app and pay the exact amount.</p>
                       <div className="grid place-items-center">
                         <img
-                          src={`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(paymentSession.qrPayload)}`}
+                          src={`/api/qr?paymentId=${paymentSession.paymentId}&amount=${paymentSession.amount}`}
                           alt="UPI QR code"
                           className="w-64 h-64 rounded-2xl border border-gray-200 dark:border-gray-700"
                         />
