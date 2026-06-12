@@ -65,8 +65,13 @@ export async function PATCH(
     const isStudent = booking.studentId === user!.userId;
     const isAdmin = user!.role === "ADMIN";
 
+    // Owner cannot approve their own booking
+    if (isOwner && isStudent && status === "CONFIRMED") {
+      return apiError("You cannot approve your own booking", 403);
+    }
+
     // Students can only cancel
-    if (isStudent && status !== "CANCELLED") {
+    if (isStudent && !isOwner && status !== "CANCELLED") {
       return apiError("Students can only cancel bookings", 403);
     }
 

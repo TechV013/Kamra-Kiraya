@@ -8,14 +8,7 @@ export function hasGeminiKey(): boolean {
 
 export async function isGeminiAvailable(): Promise<boolean> {
   if (!hasGeminiKey()) return false;
-  try {
-    const res = await fetch(`${API_BASE}/${GEMINI_MODEL}?key=${GEMINI_API_KEY}`, {
-      signal: AbortSignal.timeout(5000),
-    });
-    return res.ok;
-  } catch {
-    return false;
-  }
+  return true;
 }
 
 export async function generateChat(prompt: string, system?: string): Promise<string | null> {

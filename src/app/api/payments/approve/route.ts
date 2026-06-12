@@ -34,6 +34,10 @@ export async function POST(req: NextRequest) {
       return apiError("You can only verify payments for your own rooms", 403);
     }
 
+    if (user!.role === "OWNER" && payment.booking.studentId === user!.userId) {
+      return apiError("You cannot approve your own booking payment", 403);
+    }
+
     if (action === "approve") {
       await prisma.payment.update({
         where: { id: paymentId },
@@ -42,14 +46,14 @@ export async function POST(req: NextRequest) {
 
       await prisma.booking.update({
         where: { id: payment.bookingId },
-        data: { status: "COMPLETED" },
+        data: { status: "CONFIRMED" },
       });
 
       await prisma.notification.create({
         data: {
           userId: payment.booking.studentId,
           title: "Payment Confirmed!",
-          message: `Your payment of ₹${payment.amount.toLocaleString()} has been confirmed. Your booking is now complete.`,
+          message: `Your payment of ₹${payment.amount.toLocaleString()} has been verified. Your booking is now confirmed!`,
           type: "success",
         },
       });
