@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 import { useAuthStore } from "@/store/authStore";
 import { AlertCircle, CheckCircle, Clock, QrCode, Download, Copy } from "lucide-react";
 import Link from "next/link";
+import RoomImage from "@/components/rooms/RoomImage";
 
 interface PaymentRecord {
   id: string;
@@ -166,8 +167,8 @@ export default function PaymentsPage() {
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
-                        <img
-                          src={payment.booking.room.images?.[0] || "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=100&q=80"}
+                        <RoomImage
+                          src={payment.booking.room.images?.[0]}
                           alt={payment.booking.room.title}
                           className="w-16 h-16 rounded-lg object-cover"
                         />

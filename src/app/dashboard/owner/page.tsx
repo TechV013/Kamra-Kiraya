@@ -12,6 +12,7 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import { useAuthStore } from "@/store/authStore";
 import type { Room, Booking } from "@/types";
+import RoomImage from "@/components/rooms/RoomImage";
 
 const STATUS_COLORS: Record<string, string> = {
   PENDING: "bg-yellow-100 text-yellow-700",
@@ -26,8 +27,6 @@ const BOOKING_STATUS_COLORS: Record<string, string> = {
   CANCELLED: "bg-red-100 text-red-700",
   COMPLETED: "bg-blue-100 text-blue-700",
 };
-
-const OWNER_FALLBACK_IMAGE = "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=200&q=80";
 
 export default function OwnerDashboard() {
   const router = useRouter();
@@ -212,8 +211,8 @@ export default function OwnerDashboard() {
                   >
                     <div className="flex flex-col sm:flex-row gap-4 p-5">
                       <div className="sm:w-28 h-24 rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-700 shrink-0">
-                        <img
-                          src={room.images?.[0] || OWNER_FALLBACK_IMAGE}
+                        <RoomImage
+                          src={room.images?.[0]}
                           alt={room.title}
                           className="w-full h-full object-cover"
                         />

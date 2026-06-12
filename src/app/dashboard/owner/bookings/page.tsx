@@ -8,6 +8,7 @@ import toast from "react-hot-toast";
 import { useAuthStore } from "@/store/authStore";
 import { format } from "date-fns";
 import { CheckCircle2, XCircle, Clock, Trash2, Eye } from "lucide-react";
+import RoomImage from "@/components/rooms/RoomImage";
 
 interface Booking {
   id: string;
@@ -261,8 +262,8 @@ export default function OwnerBookingsPage() {
                 <div className="grid gap-4 md:grid-cols-[120px_1fr_auto] p-6">
                   {/* Room Image */}
                   <div className="h-28 overflow-hidden rounded-2xl bg-gray-100 dark:bg-gray-800">
-                    <img
-                      src={booking.room.images?.[0] || "https://via.placeholder.com/120x120"}
+                    <RoomImage
+                      src={booking.room.images?.[0]}
                       alt={booking.room.title}
                       className="h-full w-full object-cover"
                     />
