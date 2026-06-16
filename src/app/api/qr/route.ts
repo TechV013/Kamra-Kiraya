@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+export const runtime = "nodejs";
 import QRCode from "qrcode";
 
 export async function GET(req: NextRequest) {
