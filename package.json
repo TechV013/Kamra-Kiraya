@@ -65,6 +65,7 @@
     "nodemailer": "^8.0.10",
     "orchids-visual-edits": "^1.0.12",
     "pg": "^8.18.0",
+    "qrcode": "^1.5.4",
     "razorpay": "^2.9.6",
     "react": "19.2.0",
     "react-day-picker": "^9.11.2",
