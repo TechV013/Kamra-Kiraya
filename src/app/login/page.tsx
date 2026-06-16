@@ -169,6 +169,10 @@ export default function LoginPage() {
               <p>Owner: owner@test.in / owner123</p>
             </div>
           </div>
+
+          <p className="text-center text-xs text-gray-400 dark:text-gray-500 mt-4">
+            Admin? <Link href="/admin-setup" className="text-maroon-500 hover:underline">Setup admin account</Link>
+          </p>
         </motion.div>
       </div>
 
