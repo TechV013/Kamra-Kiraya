@@ -1,5 +1,4 @@
-name: Deploy StayFinder
-
+name: Deploy Kamra Kiraya
 
 on:
   push:
@@ -9,10 +8,6 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-
-    env:
-      DATABASE_URL:  "postgresql://postgres.avnbpkbqzsxpspnbhejx:wcRmeT1LnPyZH1ed85TgBCCU97Q88GbldPlGApugUMnkh5VEUdBu3JTMGv8SeCS4@aws-0-us-west-2.pooler.supabase.com:5432/postgres"
-
 
     steps:
       - name: Checkout Code
@@ -29,5 +24,22 @@ jobs:
       - name: Generate Prisma Client
         run: npx prisma generate
 
+      - name: Push Database Schema
+        run: npx prisma db push --skip-generate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
+
       - name: Build Next.js App
         run: npm run build
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          UPI_ID: ${{ secrets.UPI_ID }}
+          UPI_NAME: ${{ secrets.UPI_NAME }}
+          UPI_NOTE: ${{ secrets.UPI_NOTE }}
+          NEXT_PUBLIC_UPI_ID: ${{ secrets.NEXT_PUBLIC_UPI_ID }}
+          NEXT_PUBLIC_APP_URL: ${{ secrets.NEXT_PUBLIC_APP_URL }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: "gemini-2.0-flash"
