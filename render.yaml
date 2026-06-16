@@ -3,8 +3,8 @@ services:
     name: kamra-kiraya
     runtime: node
     plan: free
-    buildCommand: npm install && npx prisma generate && npm run build
-    startCommand: npx prisma db push --skip-generate && npx next start
+    buildCommand: npm install && npx prisma generate && npx prisma db push --skip-generate && npm run build
+    startCommand: npx next start
     envVars:
       - key: DATABASE_URL
         value: "postgresql://postgres.wmfibigtcaxtedfhehcx:%40Forstudents013@aws-1-ap-northeast-1.pooler.supabase.com:5432/postgres?sslmode=require"
@@ -20,7 +20,5 @@ services:
         value: "Kamra Kiraya room booking payment"
       - key: NEXT_PUBLIC_UPI_ID
         value: "8209184926@axl"
-      - key: NEXT_PUBLIC_APP_URL
-        sync: false
       - key: GEMINI_MODEL
         value: "gemini-2.0-flash"
