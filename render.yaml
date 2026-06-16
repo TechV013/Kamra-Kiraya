@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: kamra-kiraya
+    runtime: node
+    plan: free
+    buildCommand: npm install && npx prisma generate && npm run build
+    startCommand: npx prisma db push --skip-generate && npx next start
+    envVars:
+      - key: DATABASE_URL
+        value: "postgresql://postgres.wmfibigtcaxtedfhehcx:%40Forstudents013@aws-1-ap-northeast-1.pooler.supabase.com:5432/postgres?sslmode=require"
+      - key: DIRECT_URL
+        value: "postgresql://postgres.wmfibigtcaxtedfhehcx:%40Forstudents013@aws-1-ap-northeast-1.pooler.supabase.com:5432/postgres?sslmode=require"
+      - key: JWT_SECRET
+        value: "c8f2a9e1b4d7f3a6e0c5b8d2f1a4e7c9b3d6f0a2c5e8b1d4f7a0c3e6b9d2f5a8"
+      - key: UPI_ID
+        value: "8209184926@axl"
+      - key: UPI_NAME
+        value: "Kamra Kiraya"
+      - key: UPI_NOTE
+        value: "Kamra Kiraya room booking payment"
+      - key: NEXT_PUBLIC_UPI_ID
+        value: "8209184926@axl"
+      - key: NEXT_PUBLIC_APP_URL
+        sync: false
+      - key: GEMINI_MODEL
+        value: "gemini-2.0-flash"
