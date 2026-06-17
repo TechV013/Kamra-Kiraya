@@ -6,7 +6,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import {
   BookOpen, Heart, User, Clock, CheckCircle, XCircle,
-  MapPin, Calendar, ChevronRight, Building2, Star, Search, CreditCard
+  MapPin, Calendar, ChevronRight, Building2, Star, Search, CreditCard, MessageCircle
 } from "lucide-react";
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -14,6 +14,7 @@ import { useAuthStore } from "@/store/authStore";
 import type { Booking } from "@/types";
 import { format } from "date-fns";
 import RoomImage from "@/components/rooms/RoomImage";
+import ChatButton from "@/components/chat/ChatButton";
 
 const STATUS_COLORS: Record<string, string> = {
   PENDING: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300",
@@ -276,6 +277,13 @@ export default function StudentDashboard() {
                       >
                         View Room
                       </Link>
+                      {(booking.status === "CONFIRMED" || booking.status === "PENDING") && (
+                        <ChatButton
+                          bookingId={booking.id}
+                          currentUserId={user?.id || ""}
+                          otherUserName={booking.room?.owner?.name || "Owner"}
+                        />
+                      )}
                       {booking.status === "PENDING" && (
                         <button
                           onClick={() => handleCancel(booking.id)}

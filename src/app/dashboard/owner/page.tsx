@@ -196,13 +196,20 @@ export default function OwnerDashboard() {
         )}
 
         {/* Quick links */}
-        <div className="flex gap-3 mb-6">
+        <div className="flex gap-3 mb-6 flex-wrap">
           <Link
             href="/dashboard/owner/payments"
             className="inline-flex items-center gap-2 rounded-xl bg-orange-50 border border-orange-200 px-4 py-2.5 text-sm font-medium text-orange-700 hover:bg-orange-100 dark:bg-orange-900/20 dark:border-orange-800 dark:text-orange-300 transition"
           >
             <CreditCard className="w-4 h-4" />
             Payment Verification
+          </Link>
+          <Link
+            href="/dashboard/owner/payment-settings"
+            className="inline-flex items-center gap-2 rounded-xl bg-purple-50 border border-purple-200 px-4 py-2.5 text-sm font-medium text-purple-700 hover:bg-purple-100 dark:bg-purple-900/20 dark:border-purple-800 dark:text-purple-300 transition"
+          >
+            <CreditCard className="w-4 h-4" />
+            Payment Settings
           </Link>
         </div>
 
