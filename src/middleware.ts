@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 
-const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || "");
+const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || "fallback-key-build-only");
 
 const PUBLIC_ROUTES = ["/", "/login", "/register", "/about", "/contact", "/browse", "/admin-setup"];
 const PUBLIC_API_ROUTES = ["/api/auth/", "/api/rooms", "/api/reviews", "/api/health", "/api/qr", "/api/admin/setup"];
