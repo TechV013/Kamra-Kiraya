@@ -4,12 +4,12 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Eye, EyeOff, Building2, Mail, Lock, User, Phone, ArrowRight, GraduationCap, Home } from "lucide-react";
+import { Eye, EyeOff, Building2, Mail, Lock, User, Phone, ArrowRight, GraduationCap, Home, Shield } from "lucide-react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useAuthStore } from "@/store/authStore";
 
-type Role = "STUDENT" | "OWNER";
+type Role = "STUDENT" | "OWNER" | "ADMIN";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -28,6 +28,7 @@ export default function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPwd, setShowPwd] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [adminSecret, setAdminSecret] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,10 +37,12 @@ export default function RegisterPage() {
     if (password.length < 6) { toast.error("Password must be at least 6 characters"); return; }
     setLoading(true);
     try {
-      const res = await axios.post("/api/auth/register", { name, email, password, role, phone });
+      const res = await axios.post("/api/auth/register", { name, email, password, role, phone, adminSecret: role === "ADMIN" ? adminSecret : undefined });
       login(res.data.user, res.data.token);
       toast.success(`Welcome to कमरा किराया, ${res.data.user.name}!`);
-      router.push(role === "OWNER" ? "/dashboard/owner" : "/dashboard/student");
+      if (role === "ADMIN") router.push("/dashboard/admin");
+      else if (role === "OWNER") router.push("/dashboard/owner");
+      else router.push("/dashboard/student");
     } catch (err: any) {
       toast.error(err?.response?.data?.error || "Registration failed");
     } finally {
@@ -86,7 +89,7 @@ export default function RegisterPage() {
           <p className="text-gray-500 dark:text-gray-400 mb-6">Join thousands of students and owners</p>
 
           {/* Role Toggle */}
-          <div className="grid grid-cols-2 gap-3 mb-6">
+          <div className="grid grid-cols-3 gap-3 mb-6">
             <button
               type="button"
               onClick={() => setRole("STUDENT")}
@@ -117,7 +120,39 @@ export default function RegisterPage() {
                 <p className="text-xs text-gray-400">List property</p>
               </div>
             </button>
+            <button
+              type="button"
+              onClick={() => setRole("ADMIN")}
+              className={`flex items-center gap-2.5 p-4 rounded-xl border-2 transition-all ${
+                role === "ADMIN"
+                  ? "border-maroon-500 bg-maroon-50 dark:bg-maroon-950/40"
+                  : "border-gray-200 dark:border-gray-700 hover:border-maroon-300"
+              }`}
+            >
+              <Shield className={`w-5 h-5 ${role === "ADMIN" ? "text-maroon-600" : "text-gray-400"}`} />
+              <div className="text-left">
+                <p className={`text-sm font-semibold ${role === "ADMIN" ? "text-maroon-700 dark:text-maroon-300" : "text-gray-700 dark:text-gray-200"}`}>Admin</p>
+                <p className="text-xs text-gray-400">Manage platform</p>
+              </div>
+            </button>
           </div>
+
+          {/* Admin Secret Key */}
+          {role === "ADMIN" && (
+            <div className="mb-4 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-xl">
+              <p className="text-xs text-amber-700 dark:text-amber-300 mb-2 font-medium">Admin registration requires a secret key</p>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-500" />
+                <input
+                  type="password"
+                  value={adminSecret}
+                  onChange={(e) => setAdminSecret(e.target.value)}
+                  placeholder="Enter admin secret key"
+                  className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-800 border border-amber-300 dark:border-amber-600 rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-400 outline-none focus:border-maroon-400 focus:ring-1 focus:ring-maroon-400 transition-all"
+                />
+              </div>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Name */}
