@@ -97,6 +97,12 @@ export default function StudentDashboard() {
     active: bookings.filter((b) => b.status === "CONFIRMED" || b.status === "COMPLETED").length,
     pending: bookings.filter((b) => b.status === "PENDING").length,
     cancelled: bookings.filter((b) => b.status === "CANCELLED").length,
+    totalSpent: bookings
+      .filter((b) => b.status === "CONFIRMED" || b.status === "COMPLETED")
+      .reduce((acc, b) => acc + b.totalAmount, 0),
+    pendingPayments: bookings.filter(
+      (b) => b.status === "CONFIRMED" && (!b.payment || b.payment.status !== "SUCCEEDED")
+    ).length,
   };
 
   if (!user) return null;
@@ -128,11 +134,13 @@ export default function StudentDashboard() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
           {[
             { label: "Total Bookings", value: stats.total, icon: BookOpen, bg: "bg-maroon-100 dark:bg-maroon-900/30", text: "text-maroon-600 dark:text-maroon-400" },
             { label: "Active", value: stats.active, icon: CheckCircle, bg: "bg-green-100 dark:bg-green-900/30", text: "text-green-600 dark:text-green-400" },
             { label: "Pending", value: stats.pending, icon: Clock, bg: "bg-yellow-100 dark:bg-yellow-900/30", text: "text-yellow-600 dark:text-yellow-400" },
+            { label: "Total Spent", value: `₹${stats.totalSpent.toLocaleString()}`, icon: CreditCard, bg: "bg-blue-100 dark:bg-blue-900/30", text: "text-blue-600 dark:text-blue-400" },
+            { label: "Pending Payments", value: stats.pendingPayments, icon: CreditCard, bg: "bg-orange-100 dark:bg-orange-900/30", text: "text-orange-600 dark:text-orange-400" },
             { label: "Cancelled", value: stats.cancelled, icon: XCircle, bg: "bg-red-100 dark:bg-red-900/30", text: "text-red-600 dark:text-red-400" },
           ].map((s, i) => (
             <motion.div

@@ -50,13 +50,22 @@ export async function PUT(
     }
 
     const body = await req.json();
+    const allowedFields = [
+      "title", "description", "address", "city", "state", "zipCode",
+      "latitude", "longitude", "priceDaily", "priceMonthly", "roomType",
+      "maxOccupancy", "totalRooms", "availableRooms", "images", "amenities",
+      "rules", "isAvailable",
+    ];
+    const filtered: Record<string, unknown> = {};
+    for (const key of allowedFields) {
+      if (body[key] !== undefined) filtered[key] = body[key];
+    }
+    if (filtered.priceDaily !== undefined) filtered.priceDaily = parseFloat(filtered.priceDaily as string);
+    if (filtered.priceMonthly !== undefined) filtered.priceMonthly = parseFloat(filtered.priceMonthly as string);
+
     const updated = await prisma.room.update({
       where: { id },
-      data: {
-        ...body,
-        priceDaily: body.priceDaily ? parseFloat(body.priceDaily) : undefined,
-        priceMonthly: body.priceMonthly ? parseFloat(body.priceMonthly) : undefined,
-      },
+      data: filtered,
     });
 
     return apiResponse(updated);

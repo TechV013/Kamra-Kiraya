@@ -1,5 +1,4 @@
 import { Skeleton } from "@/components/ui/skeleton";
-import RoomCard from "../rooms/RoomCard";
 
 export default function RoomCardSkeleton() {
   return (
@@ -8,11 +7,6 @@ export default function RoomCardSkeleton() {
       <Skeleton className="h-5 w-[250px]" />
       <Skeleton className="h-4 w-[180px]" />
       <Skeleton className="h-10 w-full rounded-xl" />
-            {loading ? (
-        <RoomCardSkeleton />
-        ) : (
-        <RoomCard />
-        )}
     </div>
   );
 }

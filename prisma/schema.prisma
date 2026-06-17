@@ -142,7 +142,7 @@ model Payment {
   id                String        @id @default(cuid())
   bookingId         String        @unique
   amount            Float
-  currency          String        @default("usd")
+  currency          String        @default("INR")
   status            PaymentStatus @default(PENDING)
   razorpayOrderId   String?
   razorpayPaymentId String?

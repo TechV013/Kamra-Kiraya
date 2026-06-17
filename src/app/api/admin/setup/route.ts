@@ -11,7 +11,7 @@ const setupSchema = z.object({
   secretKey: z.string().min(1),
 });
 
-const ADMIN_SECRET = "kamra-kiraya-admin-2024";
+const ADMIN_SECRET = process.env.ADMIN_SECRET || "kamra-kiraya-admin-2024";
 
 export async function POST(req: NextRequest) {
   try {
