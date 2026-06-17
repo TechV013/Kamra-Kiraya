@@ -60,6 +60,7 @@ export default function Footer() {
                 { href: "/login", label: "Sign In" },
                 { href: "/dashboard/student", label: "Student Dashboard" },
                 { href: "/dashboard/owner", label: "Owner Dashboard" },
+                { href: "/admin-setup", label: "Admin Portal" },
               ].map((l) => (
                 <li key={l.href}>
                   <Link href={l.href} className="text-sm text-gray-400 hover:text-white transition-colors">
