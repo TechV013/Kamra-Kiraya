@@ -1,19 +1,18 @@
 import jwt from "jsonwebtoken";
 import { NextRequest } from "next/server";
 
-const JWT_SECRET = process.env.JWT_SECRET || "";
-
-function getSecret(): string {
-  if (!JWT_SECRET) {
-    throw new Error("JWT_SECRET environment variable is missing!");
-  }
-  return JWT_SECRET;
-}
-
 export interface JWTPayload {
   userId: string;
   email: string;
   role: string;
+}
+
+function getSecret(): string {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error("JWT_SECRET environment variable is missing! Set it in your environment.");
+  }
+  return secret;
 }
 
 export function signToken(payload: JWTPayload): string {
@@ -22,7 +21,9 @@ export function signToken(payload: JWTPayload): string {
 
 export function verifyToken(token: string): JWTPayload | null {
   try {
-    return jwt.verify(token, getSecret()) as any as JWTPayload;
+    const secret = process.env.JWT_SECRET;
+    if (!secret) return null;
+    return jwt.verify(token, secret) as any as JWTPayload;
   } catch {
     return null;
   }
