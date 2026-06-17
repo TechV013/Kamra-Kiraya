@@ -12,6 +12,8 @@ services:
         value: "***REMOVED***"
       - key: JWT_SECRET
         value: "***REMOVED***"
+      - key: ADMIN_SECRET
+        value: "***REMOVED***"
       - key: UPI_ID
         value: "8209184926@axl"
       - key: UPI_NAME

@@ -14,9 +14,9 @@ export async function isGeminiAvailable(): Promise<boolean> {
 export async function generateChat(prompt: string, system?: string): Promise<string | null> {
   if (!hasGeminiKey()) return null;
   try {
-    const res = await fetch(`${API_BASE}/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`, {
+    const res = await fetch(`${API_BASE}/${GEMINI_MODEL}:generateContent`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "x-goog-api-key": GEMINI_API_KEY },
       body: JSON.stringify({
         contents: [{ role: "user", parts: [{ text: prompt }] }],
         systemInstruction: system ? { parts: [{ text: system }] } : undefined,
@@ -36,10 +36,10 @@ export async function generateEmbedding(text: string): Promise<number[] | null> 
   if (!hasGeminiKey()) return null;
   try {
     const res = await fetch(
-      `${API_BASE}/text-embedding-004:embedContent?key=${GEMINI_API_KEY}`,
+      `${API_BASE}/text-embedding-004:embedContent`,
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "x-goog-api-key": GEMINI_API_KEY },
         body: JSON.stringify({
           model: "models/text-embedding-004",
           content: { parts: [{ text }] },
@@ -63,10 +63,10 @@ export async function generateChatStream(
   if (!hasGeminiKey()) return null;
   try {
     const res = await fetch(
-      `${API_BASE}/${GEMINI_MODEL}:streamGenerateContent?key=${GEMINI_API_KEY}&alt=sse`,
+      `${API_BASE}/${GEMINI_MODEL}:streamGenerateContent?alt=sse`,
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "x-goog-api-key": GEMINI_API_KEY },
         body: JSON.stringify({
           contents: [{ role: "user", parts: [{ text: prompt }] }],
           systemInstruction: system ? { parts: [{ text: system }] } : undefined,

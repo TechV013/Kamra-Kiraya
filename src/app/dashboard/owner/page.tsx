@@ -33,6 +33,7 @@ export default function OwnerDashboard() {
   const { user, token, hasHydrated } = useAuthStore();
   const [rooms, setRooms] = useState<Room[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
+  const [payments, setPayments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"rooms" | "bookings">("rooms");
   const [updatingBooking, setUpdatingBooking] = useState<string | null>(null);
@@ -46,12 +47,14 @@ export default function OwnerDashboard() {
 
   const fetchData = async () => {
     try {
-      const [roomsRes, bookingsRes] = await Promise.all([
+      const [roomsRes, bookingsRes, paymentsRes] = await Promise.all([
         axios.get("/api/rooms/my-rooms", { headers: { Authorization: `Bearer ${token}` } }),
         axios.get("/api/bookings/owner", { headers: { Authorization: `Bearer ${token}` } }),
+        axios.get("/api/payments/owner", { headers: { Authorization: `Bearer ${token}` } }),
       ]);
       setRooms(roomsRes.data.rooms || roomsRes.data || []);
       setBookings(bookingsRes.data || []);
+      setPayments(paymentsRes.data || []);
     } catch {
       toast.error("Failed to load data");
     } finally {
@@ -82,11 +85,30 @@ export default function OwnerDashboard() {
     .filter((b) => b.status === "CONFIRMED" || b.status === "COMPLETED")
     .reduce((acc, b) => acc + b.totalAmount, 0);
 
+  const verifiedRevenue = payments
+    .filter((p: any) => p.status === "SUCCEEDED")
+    .reduce((acc: number, p: any) => acc + p.amount, 0);
+
+  const pendingPayments = payments
+    .filter((p: any) => p.status === "VERIFICATION_PENDING")
+    .length;
+
+  const occupancyRate = rooms.length > 0
+    ? Math.round(
+        rooms.reduce((acc, r) => acc + (r.totalRooms - r.availableRooms), 0) /
+        Math.max(rooms.reduce((acc, r) => acc + r.totalRooms, 0), 1) * 100
+      )
+    : 0;
+
   const stats = {
     totalRooms: rooms.length,
     approvedRooms: rooms.filter((r) => r.status === "APPROVED").length,
     totalBookings: bookings.length,
     pendingBookings: bookings.filter((b) => b.status === "PENDING").length,
+    totalRevenue,
+    verifiedRevenue,
+    pendingPayments,
+    occupancyRate,
   };
 
   if (!user) return null;
@@ -118,8 +140,12 @@ export default function OwnerDashboard() {
           {[
             { label: "Total Listings", value: stats.totalRooms, icon: Building2, bg: "bg-maroon-100 dark:bg-maroon-900/30", text: "text-maroon-600 dark:text-maroon-400" },
             { label: "Approved", value: stats.approvedRooms, icon: CheckCircle, bg: "bg-green-100 dark:bg-green-900/30", text: "text-green-600 dark:text-green-400" },
-            { label: "Bookings", value: stats.totalBookings, icon: BookOpen, bg: "bg-maroon-100 dark:bg-maroon-900/30", text: "text-maroon-600 dark:text-maroon-400" },
-            { label: "Revenue", value: `₹${totalRevenue.toLocaleString()}`, icon: TrendingUp, bg: "bg-blue-100 dark:bg-blue-900/30", text: "text-blue-600 dark:text-blue-400" },
+            { label: "Revenue (Confirmed)", value: `₹${stats.totalRevenue.toLocaleString()}`, icon: TrendingUp, bg: "bg-blue-100 dark:bg-blue-900/30", text: "text-blue-600 dark:text-blue-400" },
+            { label: "Verified Revenue", value: `₹${stats.verifiedRevenue.toLocaleString()}`, icon: DollarSign, bg: "bg-emerald-100 dark:bg-emerald-900/30", text: "text-emerald-600 dark:text-emerald-400" },
+            { label: "Total Bookings", value: stats.totalBookings, icon: BookOpen, bg: "bg-purple-100 dark:bg-purple-900/30", text: "text-purple-600 dark:text-purple-400" },
+            { label: "Pending Bookings", value: stats.pendingBookings, icon: Clock, bg: "bg-yellow-100 dark:bg-yellow-900/30", text: "text-yellow-600 dark:text-yellow-400" },
+            { label: "Occupancy Rate", value: `${stats.occupancyRate}%`, icon: Users, bg: "bg-indigo-100 dark:bg-indigo-900/30", text: "text-indigo-600 dark:text-indigo-400" },
+            { label: "Payments to Verify", value: stats.pendingPayments, icon: CreditCard, bg: "bg-orange-100 dark:bg-orange-900/30", text: "text-orange-600 dark:text-orange-400" },
           ].map((s, i) => (
             <motion.div
               key={s.label}
@@ -139,7 +165,7 @@ export default function OwnerDashboard() {
 
         {/* Pending bookings alert */}
         {stats.pendingBookings > 0 && (
-          <div className="flex items-center gap-3 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-2xl mb-6">
+          <div className="flex items-center gap-3 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-2xl mb-4">
             <AlertCircle className="w-5 h-5 text-yellow-600 shrink-0" />
             <p className="text-sm text-yellow-700 dark:text-yellow-300 font-medium">
               You have {stats.pendingBookings} pending booking{stats.pendingBookings > 1 ? "s" : ""} that need your action
@@ -149,6 +175,22 @@ export default function OwnerDashboard() {
               className="ml-auto text-sm font-medium text-yellow-700 dark:text-yellow-300 underline hover:text-yellow-800 dark:hover:text-yellow-200"
             >
               Review now
+            </Link>
+          </div>
+        )}
+
+        {/* Pending payment verification alert */}
+        {stats.pendingPayments > 0 && (
+          <div className="flex items-center gap-3 p-4 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-700 rounded-2xl mb-6">
+            <CreditCard className="w-5 h-5 text-orange-600 shrink-0" />
+            <p className="text-sm text-orange-700 dark:text-orange-300 font-medium">
+              You have {stats.pendingPayments} payment{stats.pendingPayments > 1 ? "s" : ""} awaiting verification
+            </p>
+            <Link
+              href="/dashboard/owner/payments"
+              className="ml-auto text-sm font-medium text-orange-700 dark:text-orange-300 underline hover:text-orange-800 dark:hover:text-orange-200"
+            >
+              Verify now
             </Link>
           </div>
         )}
