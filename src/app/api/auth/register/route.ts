@@ -20,7 +20,18 @@ export async function POST(req: NextRequest) {
     const { data, errorResponse } = await validateBody(req, registerSchema);
     if (errorResponse) return errorResponse;
 
-    const { name, email, password, role, phone } = data!;
+    const { name, email, password, role, phone, adminSecret } = data!;
+
+    if (role === "ADMIN") {
+      const ADMIN_SECRET = process.env.ADMIN_SECRET || "kamra-kiraya-admin-2024";
+      if (!adminSecret || adminSecret !== ADMIN_SECRET) {
+        return apiError("Invalid admin secret key", 403);
+      }
+      const existingAdmin = await prisma.user.findFirst({ where: { role: "ADMIN" } });
+      if (existingAdmin) {
+        return apiError("Admin account already exists. Use admin-setup page instead.", 409);
+      }
+    }
 
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {
