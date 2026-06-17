@@ -6,13 +6,14 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const paymentId = searchParams.get("paymentId");
     const amount = searchParams.get("amount");
+    const ownerUpiId = searchParams.get("upiId");
+    const payeeName = searchParams.get("payeeName") || "Kamra Kiraya";
 
     if (!paymentId || !amount) {
       return new Response("Missing paymentId or amount", { status: 400 });
     }
 
-    const upiId = process.env.UPI_ID || "";
-    const payeeName = process.env.UPI_NAME || "Kamra Kiraya";
+    const upiId = ownerUpiId || process.env.UPI_ID || "";
     const note = process.env.UPI_NOTE || `Payment ${paymentId}`;
 
     const params = new URLSearchParams({

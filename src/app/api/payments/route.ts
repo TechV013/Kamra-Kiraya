@@ -4,24 +4,13 @@ import { prisma } from "@/lib/prisma";
 import { requireAuth, apiError, apiResponse, validateBody } from "@/lib/api-helpers";
 import { paymentSchema } from "@/lib/validations";
 
-const isQrPaymentConfigured = () => {
-  return (
-    !!process.env.UPI_ID &&
-    !!process.env.UPI_NAME &&
-    !process.env.UPI_ID.includes("placeholder") &&
-    !process.env.UPI_NAME.includes("placeholder")
-  );
-};
-
-const buildUpiPayload = (amount: number, bookingId: string) => {
-  const upiId = process.env.UPI_ID!;
-  const payeeName = process.env.UPI_NAME!;
-  const note = process.env.UPI_NOTE || `Orchids booking ${bookingId}`;
+const buildUpiPayload = (amount: number, bookingId: string, ownerUpiId: string, ownerUpiName: string) => {
+  const note = process.env.UPI_NOTE || `Booking ${bookingId}`;
   const txnRef = `booking_${bookingId}`;
 
   const params = new URLSearchParams({
-    pa: upiId,
-    pn: payeeName,
+    pa: ownerUpiId,
+    pn: ownerUpiName,
     am: amount.toFixed(2),
     cu: "INR",
     tn: note,
@@ -45,6 +34,7 @@ export async function GET(req: NextRequest) {
         booking: {
           include: {
             room: { select: { id: true, title: true, images: true } },
+            student: { select: { id: true, name: true, email: true } },
           },
         },
       },
@@ -64,10 +54,6 @@ export async function POST(req: NextRequest) {
   if (error) return error;
 
   try {
-    if (!isQrPaymentConfigured()) {
-      return apiError("QR payment gateway is not configured. Please contact support.", 503);
-    }
-
     const { data, errorResponse } = await validateBody(req, paymentSchema);
     if (errorResponse) return errorResponse;
 
@@ -75,7 +61,14 @@ export async function POST(req: NextRequest) {
 
     const booking = await prisma.booking.findUnique({
       where: { id: bookingId },
-      include: { payment: true, room: true },
+      include: {
+        payment: true,
+        room: {
+          include: {
+            owner: { select: { id: true, name: true, upiId: true, upiName: true } },
+          },
+        },
+      },
     });
 
     if (!booking) {
@@ -90,19 +83,34 @@ export async function POST(req: NextRequest) {
       return apiError("Booking is not approved for payment");
     }
 
+    const owner = booking.room.owner;
+    if (!owner.upiId) {
+      return apiError("Owner has not configured payment. Please contact support.", 400);
+    }
+
+    // Get commission percent from platform config
+    const config = await prisma.platformConfig.findUnique({ where: { key: "commission_percent" } });
+    const commissionPercent = parseFloat(config?.value || "5");
+    const platformFee = booking.totalAmount * (commissionPercent / 100);
+    const ownerPayout = booking.totalAmount - platformFee;
+
     // Return existing payment session if one already exists
     if (booking.payment) {
-      const qrPayload = buildUpiPayload(booking.payment.amount, booking.id);
+      const qrPayload = buildUpiPayload(
+        booking.payment.amount, booking.id,
+        owner.upiId, owner.upiName || owner.name,
+      );
       return apiResponse({
         paymentId: booking.payment.id,
         bookingId: booking.id,
         amount: booking.payment.amount,
+        platformFee: booking.payment.platformFee,
+        ownerPayout: booking.payment.ownerPayout,
         currency: booking.payment.currency,
         status: booking.payment.status,
         transactionRef: booking.payment.transactionRef,
-        upiId: process.env.UPI_ID,
-        payeeName: process.env.UPI_NAME,
-        note: process.env.UPI_NOTE || `Orchids booking ${booking.id}`,
+        upiId: owner.upiId,
+        payeeName: owner.upiName || owner.name,
         qrPayload,
       });
     }
@@ -115,21 +123,28 @@ export async function POST(req: NextRequest) {
         currency: "INR",
         status: "PENDING",
         transactionRef,
+        ownerUpiId: owner.upiId,
+        platformFee,
+        ownerPayout,
       },
     });
 
-    const qrPayload = buildUpiPayload(payment.amount, bookingId);
+    const qrPayload = buildUpiPayload(
+      payment.amount, bookingId,
+      owner.upiId, owner.upiName || owner.name,
+    );
 
     return apiResponse({
       paymentId: payment.id,
       bookingId,
       amount: payment.amount,
+      platformFee: payment.platformFee,
+      ownerPayout: payment.ownerPayout,
       currency: payment.currency,
       status: payment.status,
       transactionRef,
-      upiId: process.env.UPI_ID,
-      payeeName: process.env.UPI_NAME,
-      note: process.env.UPI_NOTE || `Orchids booking ${bookingId}`,
+      upiId: owner.upiId,
+      payeeName: owner.upiName || owner.name,
       qrPayload,
     }, 201);
   } catch (err: any) {

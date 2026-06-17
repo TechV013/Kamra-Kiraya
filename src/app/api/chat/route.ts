@@ -6,6 +6,7 @@ import { getUserFromRequest } from "@/lib/jwt";
 const SYSTEM_PROMPT = `You are a helpful assistant for कमरा किराया (Kamra Kiraya), a student room booking platform in India.
 You help students find rooms, answer questions about booking, payments, and the platform.
 Keep responses concise (2-3 sentences max). Be friendly and use simple English.
+
 Current platform features:
 - Room search & booking (daily/monthly)
 - UPI QR code payments
@@ -14,12 +15,54 @@ Current platform features:
 - Room types: Single, Double, Triple, Dormitory, Studio, Apartment
 - Cities: Jaipur, Delhi, Mumbai, Bangalore, etc.
 
+When users ask about available rooms, cities, prices, or statistics, use the data provided in the context to give specific answers.
 If asked about specific rooms, tell them to use the Browse page.
 If asked about booking issues, tell them to check their dashboard or contact support.
 Never make up URLs or links.`;
 
-function getRuleBasedResponse(message: string): string | null {
+async function getPlatformData() {
+  const [roomCount, cityStats, recentRooms] = await Promise.all([
+    prisma.room.count({ where: { status: "APPROVED", isAvailable: true } }),
+    prisma.room.groupBy({ by: ["city"], where: { status: "APPROVED", isAvailable: true }, _count: true, orderBy: { _count: { city: "desc" } } }),
+    prisma.room.findMany({
+      where: { status: "APPROVED", isAvailable: true },
+      select: { title: true, city: true, priceDaily: true, roomType: true, rating: true },
+      orderBy: { rating: "desc" },
+      take: 5,
+    }),
+  ]);
+
+  return {
+    totalRooms: roomCount,
+    cities: cityStats.map((c) => ({ city: c.city, count: c._count })),
+    topRooms: recentRooms,
+  };
+}
+
+function getRuleBasedResponse(message: string, data?: Awaited<ReturnType<typeof getPlatformData>>): string | null {
   const lower = message.toLowerCase();
+
+  if (lower.includes("how many") && (lower.includes("room") || lower.includes("available"))) {
+    if (data) return `We currently have ${data.totalRooms} rooms available across ${data.cities.length} cities. Browse our catalog to find your perfect room!`;
+  }
+
+  if (lower.includes("city") || lower.includes("cities") || lower.includes("where")) {
+    if (data && data.cities.length > 0) {
+      const cityList = data.cities.slice(0, 5).map((c) => `${c.city} (${c.count} rooms)`).join(", ");
+      return `We have rooms in: ${cityList}. Visit the Browse page to explore all cities!`;
+    }
+  }
+
+  if (lower.includes("top") || lower.includes("best") || lower.includes("popular")) {
+    if (data && data.topRooms.length > 0) {
+      const roomList = data.topRooms.slice(0, 3).map((r) => `${r.title} in ${r.city} (₹${r.priceDaily}/day)`).join(", ");
+      return `Our top-rated rooms: ${roomList}. Check the Browse page for more details!`;
+    }
+  }
+
+  if (lower.includes("cheap") || lower.includes("budget") || lower.includes("affordable")) {
+    if (data) return `Budget rooms start from ₹200/day. Use the price filter on the Browse page to find affordable options in your preferred city.`;
+  }
 
   if (lower.includes("book") || lower.includes("booking")) {
     return "To book a room: 1) Go to Browse page and find a room you like, 2) Select check-in and check-out dates, 3) Click 'Book Now'. The owner will review your request. You'll need to complete payment after approval.";
@@ -52,6 +95,7 @@ function getRuleBasedResponse(message: string): string | null {
     return "You're welcome! If you have any other questions, feel free to ask. Happy room hunting!";
   }
   if (lower.includes("price") || lower.includes("cost") || lower.includes("rent")) {
+    if (data) return `Room prices vary by city and type. We have rooms from ₹200/day to ₹2000+/day. Use the price filter on the Browse page to find options in your budget.`;
     return "Room prices vary by city, type, and amenities. Browse rooms to see daily and monthly rates. You can filter by price range on the Browse page.";
   }
   if (lower.includes("single") || lower.includes("double") || lower.includes("dorm")) {
@@ -60,14 +104,25 @@ function getRuleBasedResponse(message: string): string | null {
   return null;
 }
 
+interface ChatMessage {
+  role: "user" | "assistant";
+  content: string;
+}
+
 export async function POST(req: NextRequest) {
   try {
-    const { message } = await req.json();
+    const { message, history } = await req.json();
     if (!message || typeof message !== "string") {
       return Response.json({ response: "Please provide a message." }, { status: 400 });
     }
 
     const provider = await getActiveProvider();
+    const data = await getPlatformData();
+
+    const ruleBased = getRuleBasedResponse(message, data);
+    if (ruleBased) {
+      return Response.json({ response: ruleBased, provider: "Rule-based" });
+    }
 
     let aiResponse: string | null = null;
 
@@ -85,15 +140,23 @@ export async function POST(req: NextRequest) {
           }
         }
 
-        const prompt = `User message: ${message}${userInfo}\n\nRespond helpfully as a room booking assistant:`;
-        aiResponse = await generateChat(prompt, SYSTEM_PROMPT);
+        const dataContext = `\nPlatform data: ${data.totalRooms} rooms available in ${data.cities.length} cities. Top cities: ${data.cities.slice(0, 5).map((c) => `${c.city} (${c.count})`).join(", ")}.`;
+
+        const messages: ChatMessage[] = [
+          { role: "user" as const, content: `User message: ${message}${userInfo}${dataContext}\n\nRespond helpfully as a room booking assistant:` },
+        ];
+
+        if (Array.isArray(history)) {
+          for (const msg of history.slice(-6)) {
+            messages.push({ role: msg.role, content: msg.content });
+          }
+          messages.push({ role: "user" as const, content: message });
+        }
+
+        aiResponse = await generateChat(messages.map((m) => m.content).join("\n"), SYSTEM_PROMPT);
       } catch {
         aiResponse = null;
       }
-    }
-
-    if (!aiResponse) {
-      aiResponse = getRuleBasedResponse(message);
     }
 
     if (!aiResponse) {

@@ -9,6 +9,7 @@ import { useAuthStore } from "@/store/authStore";
 import { format } from "date-fns";
 import { CheckCircle2, XCircle, Clock, Trash2, Eye } from "lucide-react";
 import RoomImage from "@/components/rooms/RoomImage";
+import ChatButton from "@/components/chat/ChatButton";
 
 interface Booking {
   id: string;
@@ -367,6 +368,13 @@ export default function OwnerBookingsPage() {
 
                   {/* Actions */}
                   <div className="flex flex-col gap-2 justify-start">
+                    {(booking.status === "CONFIRMED" || booking.status === "PENDING") && (
+                      <ChatButton
+                        bookingId={booking.id}
+                        currentUserId={user?.id || ""}
+                        otherUserName={booking.student.name}
+                      />
+                    )}
                     {booking.status === "PENDING" ? (
                       <>
                         <button

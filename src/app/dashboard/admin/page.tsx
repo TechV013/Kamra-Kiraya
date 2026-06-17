@@ -9,7 +9,7 @@ import { useAuthStore } from "@/store/authStore";
 import { format } from "date-fns";
 import {
   Building2, Users, BookOpen, DollarSign, Shield, Clock,
-  CheckCircle2, XCircle, AlertCircle, ChevronRight, TrendingUp
+  CheckCircle2, XCircle, AlertCircle, ChevronRight, TrendingUp, Settings
 } from "lucide-react";
 import RoomImage from "@/components/rooms/RoomImage";
 
@@ -164,6 +164,16 @@ export default function AdminDashboardPage() {
             </div>
             <p className="text-sm text-gray-500 dark:text-gray-400">Bookings</p>
             <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats?.totalBookings ?? "—"}</p>
+          </Link>
+
+          <Link href="/dashboard/admin/settings" className="group rounded-2xl border border-gray-200 bg-white p-5 shadow-sm hover:shadow-md dark:border-gray-800 dark:bg-gray-900 transition">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400">
+                <Settings className="w-5 h-5" />
+              </div>
+            </div>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Settings</p>
+            <p className="text-lg font-bold text-gray-900 dark:text-white">Platform Config</p>
           </Link>
         </div>
 

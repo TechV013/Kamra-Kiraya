@@ -50,6 +50,12 @@ enum PropertyStatus {
   INACTIVE
 }
 
+enum MessageType {
+  TEXT
+  SYSTEM
+  IMAGE
+}
+
 model User {
   id                  String    @id @default(cuid())
   name                String
@@ -64,6 +70,8 @@ model User {
   lockedUntil         DateTime?
   resetToken          String?
   resetTokenExpiry    DateTime?
+  upiId               String?
+  upiName             String?
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
 
@@ -72,6 +80,7 @@ model User {
   reviews             Review[]
   wishlist            Wishlist[]
   notifications       Notification[]
+  sentMessages        Message[]
 
   @@map("users")
 }
@@ -133,6 +142,7 @@ model Booking {
   room        Room          @relation(fields: [roomId], references: [id], onDelete: Cascade)
   student     User          @relation(fields: [studentId], references: [id], onDelete: Cascade)
   payment     Payment?
+  messages    Message[]
 
   @@map("bookings")
 }
@@ -143,10 +153,9 @@ model Payment {
   amount            Float
   currency          String        @default("INR")
   status            PaymentStatus @default(PENDING)
-  razorpayOrderId   String?
-  razorpayPaymentId String?
-  stripePaymentId   String?
-  stripeSessionId   String?
+  ownerUpiId        String?
+  platformFee       Float         @default(0)
+  ownerPayout       Float         @default(0)
   refundId          String?
   paymentReference  String?
   transactionRef    String?
@@ -199,4 +208,30 @@ model Notification {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("notifications")
+}
+
+model Message {
+  id         String      @id @default(cuid())
+  bookingId  String
+  senderId   String
+  content    String
+  type       MessageType @default(TEXT)
+  isRead     Boolean     @default(false)
+  createdAt  DateTime    @default(now())
+
+  booking    Booking     @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  sender     User        @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([bookingId, createdAt])
+  @@map("messages")
+}
+
+model PlatformConfig {
+  key         String  @unique
+  value       String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("platform_configs")
 }
