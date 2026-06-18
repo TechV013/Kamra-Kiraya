@@ -34,12 +34,13 @@ jobs:
       - name: Build Next.js App
         run: npm run build
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          UPI_ID: ${{ secrets.UPI_ID }}
-          UPI_NAME: ${{ secrets.UPI_NAME }}
+          DATABASE_URL: ${{postgresql://postgres.wmfibigtcaxtedfhehcx:%40Forstudents013@aws-1-ap-northeast-1.pooler.supabase.com:5432/postgres?sslmode=require
+}}
+          JWT_SECRET: ${{ c8f2a9e1b4d7f3a6e0c5b8d2f1a4e7c9b3d6f0a2c5e8b1d4f7a0c3e6b9d2f5a8 }}
+          UPI_ID: ${{ 8209184926@axl }}
+          UPI_NAME: ${{ Kamra Kiraya }}
           UPI_NOTE: ${{ secrets.UPI_NOTE }}
           NEXT_PUBLIC_UPI_ID: ${{ secrets.NEXT_PUBLIC_UPI_ID }}
           NEXT_PUBLIC_APP_URL: ${{ secrets.NEXT_PUBLIC_APP_URL }}
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEY: ${{ AQ.Ab8RN6JdYBe_M0nRFJG6QJzVhg1AzB5BOh6pGnw4_JyDpXgc6A }}
           GEMINI_MODEL: "gemini-2.0-flash"
