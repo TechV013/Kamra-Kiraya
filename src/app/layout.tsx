@@ -8,6 +8,7 @@ import { Toaster } from "react-hot-toast";
 import Navbar from "@/components/shared/Navbar";
 import Footer from "@/components/shared/Footer";
 import SmoothScroll from "@/components/providers/SmoothScroll";
+import ThemeProvider from "@/components/providers/ThemeProvider";
 import ChatbotWrapper from "@/components/ai/ChatbotWrapper";
 
 const geistSans = Geist({
@@ -38,33 +39,35 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <SmoothScroll>
-          <Navbar />
+        <ThemeProvider>
+          <SmoothScroll>
+            <Navbar />
 
-          <main className="min-h-screen pt-16">
-            {children}
-          </main>
+            <main className="min-h-screen pt-16">
+              {children}
+            </main>
 
-          <Footer />
-        </SmoothScroll>
+            <Footer />
+          </SmoothScroll>
 
-        <ChatbotWrapper />
+          <ChatbotWrapper />
 
-        <Toaster
-          position="top-right"
-          toastOptions={{
-            duration: 3500,
-            style: {
-              borderRadius: "12px",
-              background: "var(--background)",
-              color: "var(--foreground)",
-              border: "1px solid var(--border)",
-              fontSize: "14px",
-            },
-          }}
-        />
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              duration: 3500,
+              style: {
+                borderRadius: "12px",
+                background: "var(--background)",
+                color: "var(--foreground)",
+                border: "1px solid var(--border)",
+                fontSize: "14px",
+              },
+            }}
+          />
 
-        <VisualEditsMessenger />
+          <VisualEditsMessenger />
+        </ThemeProvider>
       </body>
     </html>
   );
