@@ -7,16 +7,12 @@ export interface JWTPayload {
   role: string;
 }
 
-function getSecret(): string {
+export function signToken(payload: JWTPayload): string {
   const secret = process.env.JWT_SECRET;
   if (!secret) {
     throw new Error("JWT_SECRET environment variable is missing! Set it in your environment.");
   }
-  return secret;
-}
-
-export function signToken(payload: JWTPayload): string {
-  return jwt.sign(payload, getSecret(), { expiresIn: "7d" });
+  return jwt.sign(payload, secret, { expiresIn: "7d" });
 }
 
 export function verifyToken(token: string): JWTPayload | null {
