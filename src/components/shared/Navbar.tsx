@@ -4,11 +4,11 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  Building2, Menu, X, Sun, Moon, Bell, User, LogOut,
+import { Building2, Menu, X, Sun, Moon, Bell, User, LogOut,
   LayoutDashboard, Heart, BookOpen, ChevronDown, Home, Search
 } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
+import { useTheme } from "next-themes";
 import axios from "axios";
 import toast from "react-hot-toast";
 
@@ -16,15 +16,10 @@ export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, token, logout } = useAuthStore();
+  const { theme, setTheme } = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [dark, setDark] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const isDark = document.documentElement.classList.contains("dark");
-    setDark(isDark);
-  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
@@ -33,8 +28,7 @@ export default function Navbar() {
   }, []);
 
   const toggleDark = () => {
-    document.documentElement.classList.toggle("dark");
-    setDark((prev) => !prev);
+    setTheme(theme === "dark" ? "light" : "dark");
   };
 
   const handleLogout = async () => {
@@ -104,7 +98,7 @@ export default function Navbar() {
               className="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
               aria-label="Toggle dark mode"
             >
-              {dark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
 
             {user ? (
