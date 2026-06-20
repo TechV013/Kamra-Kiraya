@@ -7,7 +7,7 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import { useAuthStore } from "@/store/authStore";
 import { format } from "date-fns";
-import { BookOpen, Search, ChevronLeft, ChevronRight, Eye } from "lucide-react";
+import { BookOpen, Search, ChevronLeft, ChevronRight, Eye, XCircle, CheckCircle } from "lucide-react";
 
 interface AdminBooking {
   id: string;
@@ -49,6 +49,21 @@ export default function AdminBookingsPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [selectedBooking, setSelectedBooking] = useState<AdminBooking | null>(null);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+
+  const handleStatusChange = async (bookingId: string, status: string) => {
+    setActionLoading(bookingId);
+    try {
+      await axios.patch(`/api/bookings/${bookingId}`, { status }, { headers: { Authorization: `Bearer ${token}` } });
+      toast.success(`Booking ${status.toLowerCase()}`);
+      setSelectedBooking(null);
+      fetchBookings();
+    } catch (err: any) {
+      toast.error(err?.response?.data?.error || `Failed to ${status.toLowerCase()} booking`);
+    } finally {
+      setActionLoading(null);
+    }
+  };
 
   useEffect(() => {
     if (!hasHydrated) return;
@@ -215,10 +230,41 @@ export default function AdminBookingsPage() {
                         <p className="text-xs text-gray-500 mt-1">Txn ID: {selectedBooking.payment.paymentReference}</p>
                       )}
                     </div>
-                  )}
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex gap-2 pt-2 border-t border-gray-100 dark:border-gray-800">
+                    {selectedBooking.status === "PENDING" && (
+                      <button
+                        onClick={() => handleStatusChange(selectedBooking.id, "CANCELLED")}
+                        disabled={actionLoading === selectedBooking.id}
+                        className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-red-50 text-red-600 px-4 py-2 text-sm font-medium hover:bg-red-100 disabled:opacity-50 transition dark:bg-red-950/30 dark:text-red-400"
+                      >
+                        <XCircle className="w-4 h-4" /> Cancel
+                      </button>
+                    )}
+                    {selectedBooking.status === "CONFIRMED" && (
+                      <>
+                        <button
+                          onClick={() => handleStatusChange(selectedBooking.id, "COMPLETED")}
+                          disabled={actionLoading === selectedBooking.id}
+                          className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-green-50 text-green-600 px-4 py-2 text-sm font-medium hover:bg-green-100 disabled:opacity-50 transition dark:bg-green-950/30 dark:text-green-400"
+                        >
+                          <CheckCircle className="w-4 h-4" /> Mark Completed
+                        </button>
+                        <button
+                          onClick={() => handleStatusChange(selectedBooking.id, "CANCELLED")}
+                          disabled={actionLoading === selectedBooking.id}
+                          className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-red-50 text-red-600 px-4 py-2 text-sm font-medium hover:bg-red-100 disabled:opacity-50 transition dark:bg-red-950/30 dark:text-red-400"
+                        >
+                          <XCircle className="w-4 h-4" /> Cancel
+                        </button>
+                      </>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </div>
           </div>
         )}
       </div>
