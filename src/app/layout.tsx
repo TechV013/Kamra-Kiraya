@@ -22,11 +22,29 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "कमरा किराया – Student Room Booking Platform",
+  title: {
+    default: "कमरा किराया – Student Room Booking Platform",
+    template: "%s | कमरा किराया",
+  },
   description:
     "Find and book verified rental rooms, PG, and hostels near your college. कमरा किराया makes student accommodation easy.",
   keywords:
-    "student rooms, PG, hostel, rental rooms, college accommodation, कमरा किराया",
+    "student rooms, PG, hostel, rental rooms, college accommodation, कमरा किराया, room booking",
+  openGraph: {
+    title: "कमरा किराया – Student Room Booking Platform",
+    description:
+      "Find and book verified rental rooms, PG, and hostels near your college.",
+    type: "website",
+    locale: "en_IN",
+    siteName: "कमरा किराया",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "कमरा किराया – Student Room Booking",
+    description:
+      "Find and book verified rental rooms near your college.",
+  },
+  robots: { index: true, follow: true },
 };
 
 export default function RootLayout({
