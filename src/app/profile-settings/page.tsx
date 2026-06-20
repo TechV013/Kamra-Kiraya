@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { format } from "date-fns";
 import { useAuthStore } from "@/store/authStore";
-import { ArrowLeft, Shield, Save, RefreshCcw, Camera, LogOut, Mail } from "lucide-react";
+import { ArrowLeft, Shield, Save, RefreshCcw, Camera, LogOut, Mail, Upload, Trash2 } from "lucide-react";
 
 const DEFAULT_AVATAR = "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=512&q=80";
 
@@ -37,6 +37,9 @@ export default function ProfileSettingsPage() {
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!hasHydrated) return;
@@ -88,6 +91,44 @@ export default function ProfileSettingsPage() {
       toast.error(err?.response?.data?.error || "Update failed. Please try again.");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const allowed = ["image/jpeg", "image/png", "image/webp"];
+    if (!allowed.includes(file.type)) { toast.error("Only JPEG, PNG, WebP allowed"); return; }
+    if (file.size > 2 * 1024 * 1024) { toast.error("File must be under 2MB"); return; }
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("avatar", file);
+      const res = await axios.post("/api/users/avatar", formData, {
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" },
+      });
+      setProfile((prev) => ({ ...prev, avatar: res.data.user.avatar }));
+      login(res.data.user, token ?? "");
+      toast.success("Avatar uploaded");
+    } catch (err: any) {
+      toast.error(err?.response?.data?.error || "Upload failed");
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const handleAvatarDelete = async () => {
+    if (!profile.avatar) return;
+    try {
+      await axios.delete("/api/users/avatar", { headers: { Authorization: `Bearer ${token}` } });
+      setProfile((prev) => ({ ...prev, avatar: "" }));
+      login({ ...user!, avatar: "" }, token ?? "");
+      toast.success("Avatar removed");
+    } catch (err: any) {
+      toast.error(err?.response?.data?.error || "Delete failed");
     }
   };
 
@@ -203,25 +244,7 @@ export default function ProfileSettingsPage() {
               </div>
 
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Profile image URL</label>
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-                  <input
-                    value={profile.avatar}
-                    onChange={(event) => setProfile({ ...profile, avatar: event.target.value })}
-                    className="flex-1 rounded-3xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none focus:border-maroon-500 focus:ring-1 focus:ring-maroon-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
-                    placeholder="Paste an image URL"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setProfile({ ...profile, avatar: "" })}
-                    className="inline-flex items-center gap-2 rounded-3xl border border-gray-200 bg-white px-5 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800"
-                  >
-                    <RefreshCcw className="w-4 h-4" /> Reset
-                  </button>
-                </div>
-              </div>
-
-              <div className="rounded-3xl border border-dashed border-gray-200 bg-gray-50 p-5 dark:border-gray-700 dark:bg-gray-950">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Profile photo</label>
                 <div className="flex items-start gap-4">
                   <div className="shrink-0">
                     <div className="relative h-20 w-20 overflow-hidden rounded-3xl bg-gray-200 dark:bg-gray-800">
@@ -233,10 +256,33 @@ export default function ProfileSettingsPage() {
                       <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
                     </div>
                   </div>
-                  <div>
-                    <p className="text-sm font-semibold text-gray-900 dark:text-white">Profile preview</p>
-                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Any image URL you paste will show here immediately.</p>
-                    <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">If you don't have a profile image, leave it blank for a clean avatar fallback.</p>
+                  <div className="flex-1 space-y-2">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      onChange={handleAvatarUpload}
+                      className="hidden"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={uploading}
+                      className="inline-flex items-center gap-2 rounded-3xl border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-60 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800"
+                    >
+                      <Upload className="w-4 h-4" />
+                      {uploading ? "Uploading..." : "Upload photo"}
+                    </button>
+                    {profile.avatar && (
+                      <button
+                        type="button"
+                        onClick={handleAvatarDelete}
+                        className="inline-flex items-center gap-2 rounded-3xl border border-red-200 bg-white px-5 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 dark:border-red-900 dark:bg-gray-900 dark:text-red-400 dark:hover:bg-red-950"
+                      >
+                        <Trash2 className="w-4 h-4" /> Remove
+                      </button>
+                    )}
+                    <p className="text-xs text-gray-500 dark:text-gray-400">JPEG, PNG, or WebP. Max 2MB.</p>
                   </div>
                 </div>
               </div>
