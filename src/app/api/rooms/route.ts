@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireRole, apiError, apiResponse, validateBody } from "@/lib/api-helpers";
 import { roomSchema } from "@/lib/validations";
+import { getOwnerVerificationStatus, handleExpiredVerification } from "@/lib/check-owner-verification";
 
 // GET /api/rooms - list rooms with filters
 export async function GET(req: NextRequest) {
@@ -107,7 +108,15 @@ export async function POST(req: NextRequest) {
       rules,
     } = data!;
 
-    const statusValue = process.env.NODE_ENV === "development" ? "APPROVED" : "PENDING";
+    let statusValue = process.env.NODE_ENV === "development" ? "APPROVED" : "PENDING";
+
+    if (user!.role === "OWNER") {
+      await handleExpiredVerification(user!.userId);
+      const verification = await getOwnerVerificationStatus(user!.userId);
+      if (!verification.isVerified) {
+        statusValue = "INACTIVE";
+      }
+    }
 
     const room = await prisma.room.create({
       data: {

@@ -56,6 +56,13 @@ enum MessageType {
   IMAGE
 }
 
+enum VerificationStatus {
+  PENDING
+  UNDER_REVIEW
+  VERIFIED
+  REJECTED
+}
+
 model User {
   id                  String    @id @default(cuid())
   name                String
@@ -81,6 +88,8 @@ model User {
   wishlist            Wishlist[]
   notifications       Notification[]
   sentMessages        Message[]
+  ownerVerification   OwnerVerification?
+  reviewedVerifications OwnerVerification[] @relation("VerificationReviews")
 
   @@map("users")
 }
@@ -234,4 +243,26 @@ model PlatformConfig {
   updatedAt   DateTime @updatedAt
 
   @@map("platform_configs")
+}
+
+model OwnerVerification {
+  id               String             @id @default(cuid())
+  ownerId          String             @unique
+  status           VerificationStatus @default(PENDING)
+  aadhaarUrl       String?
+  panUrl           String?
+  propertyProofUrl String?
+  rejectionNote    String?
+  reviewedBy       String?
+  reviewedAt       DateTime?
+  submittedAt      DateTime            @default(now())
+  expiresAt        DateTime?
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+
+  owner            User               @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  reviewer         User?              @relation("VerificationReviews", fields: [reviewedBy], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@map("owner_verifications")
 }

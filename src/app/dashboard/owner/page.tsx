@@ -6,7 +6,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import {
   Building2, Plus, Edit, Trash2, Users, BookOpen, DollarSign,
-  Clock, CheckCircle, XCircle, Eye, MapPin, Star, TrendingUp, AlertCircle, CreditCard
+  Clock, CheckCircle, XCircle, Eye, MapPin, Star, TrendingUp, AlertCircle, CreditCard, Shield
 } from "lucide-react";
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -34,6 +34,7 @@ export default function OwnerDashboard() {
   const [rooms, setRooms] = useState<Room[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [payments, setPayments] = useState<any[]>([]);
+  const [verification, setVerification] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"rooms" | "bookings">("rooms");
   const [updatingBooking, setUpdatingBooking] = useState<string | null>(null);
@@ -47,14 +48,16 @@ export default function OwnerDashboard() {
 
   const fetchData = async () => {
     try {
-      const [roomsRes, bookingsRes, paymentsRes] = await Promise.all([
+      const [roomsRes, bookingsRes, paymentsRes, verificationRes] = await Promise.all([
         axios.get("/api/rooms/my-rooms", { headers: { Authorization: `Bearer ${token}` } }),
         axios.get("/api/bookings/owner", { headers: { Authorization: `Bearer ${token}` } }),
         axios.get("/api/payments/owner", { headers: { Authorization: `Bearer ${token}` } }),
+        axios.get("/api/owner/verification", { headers: { Authorization: `Bearer ${token}` } }).catch(() => null),
       ]);
       setRooms(roomsRes.data.rooms || roomsRes.data || []);
       setBookings(bookingsRes.data || []);
       setPayments(paymentsRes.data || []);
+      setVerification(verificationRes?.data || null);
     } catch {
       toast.error("Failed to load data");
     } finally {
@@ -162,6 +165,49 @@ export default function OwnerDashboard() {
             </motion.div>
           ))}
         </div>
+
+        {/* Verification banner */}
+        {verification && verification.status && !verification.isVerified && (
+          <div className={`flex items-center gap-3 p-4 rounded-2xl mb-4 border ${
+            verification.status === "REJECTED"
+              ? "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700"
+              : verification.status === "UNDER_REVIEW"
+              ? "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700"
+              : "bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-700"
+          }`}>
+            <Shield className={`w-5 h-5 shrink-0 ${
+              verification.status === "REJECTED" ? "text-red-600" : verification.status === "UNDER_REVIEW" ? "text-blue-600" : "text-yellow-600"
+            }`} />
+            <p className={`text-sm font-medium ${
+              verification.status === "REJECTED" ? "text-red-700 dark:text-red-300" : verification.status === "UNDER_REVIEW" ? "text-blue-700 dark:text-blue-300" : "text-yellow-700 dark:text-yellow-300"
+            }`}>
+              {verification.status === "REJECTED" && "Your verification was rejected. "}
+              {verification.status === "UNDER_REVIEW" && "Your verification is under review. "}
+              {verification.status === "PENDING" && "Complete your verification to publish rooms. "}
+            </p>
+            <Link
+              href="/dashboard/owner/verification"
+              className="ml-auto text-sm font-medium underline hover:no-underline shrink-0"
+            >
+              {verification.status === "REJECTED" ? "Resubmit →" : "View →"}
+            </Link>
+          </div>
+        )}
+
+        {verification && !verification.status && (
+          <div className="flex items-center gap-3 p-4 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-2xl mb-4">
+            <Shield className="w-5 h-5 text-gray-500 shrink-0" />
+            <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+              Verify your account to publish rooms and receive bookings.
+            </p>
+            <Link
+              href="/dashboard/owner/verification"
+              className="ml-auto text-sm font-medium text-maroon-600 dark:text-maroon-400 underline hover:no-underline shrink-0"
+            >
+              Get verified →
+            </Link>
+          </div>
+        )}
 
         {/* Pending bookings alert */}
         {stats.pendingBookings > 0 && (
