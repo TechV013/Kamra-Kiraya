@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireRole, apiError, apiResponse } from "@/lib/api-helpers";
 import { getSignedUrl } from "@/lib/supabase-storage";
+import { sendVerificationApproved, sendVerificationRejected } from "@/lib/email";
 
 const DETAIL_SELECT = {
   id: true, ownerId: true, status: true,
@@ -66,9 +67,12 @@ export async function PUT(
 
     const record = await prisma.ownerVerification.findUnique({
       where: { id: params.id },
+      include: { owner: { select: { name: true, email: true } } },
     });
 
     if (!record) return apiError("Verification not found", 404);
+    const ownerName = record.owner.name;
+    const ownerEmail = record.owner.email;
 
     if (action === "approve") {
       await prisma.ownerVerification.update({
@@ -91,6 +95,8 @@ export async function PUT(
         },
       });
 
+      sendVerificationApproved(ownerEmail, ownerName);
+
       return apiResponse({ success: true, status: "VERIFIED" });
     }
 
@@ -108,16 +114,18 @@ export async function PUT(
       },
     });
 
-    await prisma.notification.create({
-      data: {
-        userId: record.ownerId,
-        title: "Verification Rejected",
-        message: `Your verification was rejected. Reason: ${rejectionNote}. Please resubmit with correct documents.`,
-        type: "error",
-      },
-    });
+      await prisma.notification.create({
+        data: {
+          userId: record.ownerId,
+          title: "Verification Rejected",
+          message: `Your verification was rejected. Reason: ${rejectionNote}. Please resubmit with correct documents.`,
+          type: "error",
+        },
+      });
 
-    return apiResponse({ success: true, status: "REJECTED" });
+      sendVerificationRejected(ownerEmail, ownerName, rejectionNote);
+
+      return apiResponse({ success: true, status: "REJECTED" });
   } catch (err) {
     console.error("Review verification error:", err);
     return apiError("Internal server error", 500);

@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireAuth, apiError, apiResponse, validateBody } from "@/lib/api-helpers";
 import { bookingSchema } from "@/lib/validations";
 import { differenceInDays, isValid } from "date-fns";
+import { sendBookingNotificationOwner } from "@/lib/email";
 
 // GET /api/bookings - student's bookings
 export async function GET(req: NextRequest) {
@@ -106,10 +107,17 @@ export async function POST(req: NextRequest) {
         status: "PENDING",
       },
       include: {
-        room: true,
+        room: {
+          include: { owner: { select: { name: true, email: true } } },
+        },
         payment: true,
       },
     });
+
+    const student = await prisma.user.findUnique({ where: { id: user!.userId }, select: { name: true } });
+    if (student) {
+      sendBookingNotificationOwner(booking.room.owner.email, booking.room.owner.name, student.name, booking.room.title);
+    }
 
     return apiResponse(booking, 201);
   } catch (err) {

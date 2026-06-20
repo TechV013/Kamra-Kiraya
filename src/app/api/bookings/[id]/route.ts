@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth, apiError, apiResponse } from "@/lib/api-helpers";
+import { sendBookingConfirmationStudent } from "@/lib/email";
 
 // GET /api/bookings/[id]
 export async function GET(
@@ -138,6 +139,10 @@ export async function PATCH(
       },
       include: { room: true, student: true, payment: true },
     });
+
+    if (status === "CONFIRMED" && booking.status !== "CONFIRMED") {
+      sendBookingConfirmationStudent(updated.student.email, updated.student.name, updated.room.title, id, updated.totalAmount);
+    }
 
     return apiResponse(updated);
   } catch (err) {
