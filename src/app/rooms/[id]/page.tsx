@@ -2,14 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { motion } from "framer-motion";
 import {
   MapPin, Star, Users, Wifi, Car, Coffee, Tv, Dumbbell,
-  Phone, Mail, ChevronLeft, ChevronRight, Heart, Share2,
+  Phone, Mail, Heart, Share2,
   CheckCircle, Calendar, Bed, Shield, Clock, Sparkles
 } from "lucide-react";
 import axios from "axios";
 import toast from "react-hot-toast";
+import ImageGallery from "@/components/rooms/ImageGallery";
 import Link from "next/link";
 import type { Room, Review } from "@/types";
 import { useAuthStore } from "@/store/authStore";
@@ -32,9 +32,7 @@ export default function RoomDetailPage() {
   const { isWishlisted, addToWishlist, removeFromWishlist } = useWishlistStore();
 
   const [room, setRoom] = useState<Room & { reviews?: Review[] } | null>(null);
-  const fallbackImage = "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=800&q=80";
   const [loading, setLoading] = useState(true);
-  const [imgIdx, setImgIdx] = useState(0);
   const [bookingType, setBookingType] = useState<"DAILY" | "MONTHLY">("MONTHLY");
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
@@ -247,77 +245,7 @@ export default function RoomDetailPage() {
           {/* Left: Details */}
           <div className="lg:col-span-2 space-y-6">
             {/* Image Gallery */}
-            <div className="relative rounded-2xl overflow-hidden bg-gray-200 dark:bg-gray-800" style={{ height: "420px" }}>
-              <motion.img
-                key={imgIdx}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                src={images[imgIdx]}
-                alt={room.title}
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = fallbackImage;
-                }}
-                className="w-full h-full object-cover"
-              />
-              {images.length > 1 && (
-                <>
-                  <button
-                    onClick={() => setImgIdx((p) => (p === 0 ? images.length - 1 : p - 1))}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/80 dark:bg-gray-900/80 shadow flex items-center justify-center hover:bg-white transition-colors"
-                  >
-                    <ChevronLeft className="w-5 h-5" />
-                  </button>
-                  <button
-                    onClick={() => setImgIdx((p) => (p === images.length - 1 ? 0 : p + 1))}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/80 dark:bg-gray-900/80 shadow flex items-center justify-center hover:bg-white transition-colors"
-                  >
-                    <ChevronRight className="w-5 h-5" />
-                  </button>
-                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5">
-                    {images.map((_, i) => (
-                      <button
-                        key={i}
-                        onClick={() => setImgIdx(i)}
-                        className={`w-2 h-2 rounded-full transition-all ${i === imgIdx ? "bg-white w-5" : "bg-white/60"}`}
-                      />
-                    ))}
-                  </div>
-                </>
-              )}
-              {/* Thumbnail strip */}
-              {images.length > 1 && (
-                <div className="absolute bottom-4 right-4">
-                  <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-black/60 text-white">
-                    {imgIdx + 1} / {images.length}
-                  </span>
-                </div>
-              )}
-            </div>
-
-            {/* Thumbnail row */}
-            {images.length > 1 && (
-              <div className="flex gap-2 overflow-x-auto pb-2">
-                {images.map((img, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setImgIdx(i)}
-                    className={`shrink-0 w-20 h-16 rounded-xl overflow-hidden border-2 transition-all ${
-                      i === imgIdx ? "border-maroon-500" : "border-transparent opacity-60 hover:opacity-100"
-                    }`}
-                  >
-                    <img
-                      src={img}
-                      alt=""
-                      loading="lazy"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = fallbackImage;
-                      }}
-                      className="w-full h-full object-cover"
-                    />
-                  </button>
-                ))}
-              </div>
-            )}
+            <ImageGallery images={images} className="h-[420px]" />
 
             {/* Title + actions */}
             <div>
