@@ -22,9 +22,10 @@ interface Message {
 interface ChatBoxProps {
   bookingId: string;
   currentUserId: string;
+  onRead?: () => void;
 }
 
-export default function ChatBox({ bookingId, currentUserId }: ChatBoxProps) {
+export default function ChatBox({ bookingId, currentUserId, onRead }: ChatBoxProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -61,10 +62,11 @@ export default function ChatBox({ bookingId, currentUserId }: ChatBoxProps) {
         { bookingId },
         { headers: { Authorization: `Bearer ${token}` } }
       );
+      onRead?.();
     } catch (error) {
       console.error("Failed to mark as read:", error);
     }
-  }, [bookingId, token]);
+  }, [bookingId, token, onRead]);
 
   useEffect(() => {
     fetchMessages();

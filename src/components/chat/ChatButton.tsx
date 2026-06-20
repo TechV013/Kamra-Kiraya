@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, X } from "lucide-react";
 import axios from "axios";
 import { useAuthStore } from "@/store/authStore";
+import { useChatStore } from "@/store/chatStore";
 import ChatBox from "./ChatBox";
 
 interface ChatButtonProps {
@@ -19,8 +20,9 @@ export default function ChatButton({
   otherUserName,
 }: ChatButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
   const { token } = useAuthStore();
+  const { perBooking, fetchUnread, markRead } = useChatStore();
+  const unreadCount = perBooking[bookingId] || 0;
 
   const fetchUnreadCount = useCallback(async () => {
     if (!token) return;
@@ -29,9 +31,13 @@ export default function ChatButton({
         `/api/messages/unread?bookingId=${bookingId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      setUnreadCount(res.data.count || 0);
-    } catch (error) {
-      console.error("Failed to fetch unread count:", error);
+      const count = res.data.unread || 0;
+      useChatStore.setState((state) => ({
+        perBooking: { ...state.perBooking, [bookingId]: count },
+        totalUnread: Object.values({ ...state.perBooking, [bookingId]: count }).reduce((a, b) => a + b, 0),
+      }));
+    } catch {
+      // silent
     }
   }, [bookingId, token]);
 
@@ -41,11 +47,10 @@ export default function ChatButton({
     return () => clearInterval(interval);
   }, [fetchUnreadCount]);
 
-  useEffect(() => {
-    if (isOpen) {
-      setUnreadCount(0);
-    }
-  }, [isOpen]);
+  const handleOpen = () => {
+    setIsOpen(true);
+    markRead(bookingId);
+  };
 
   return (
     <>
@@ -53,7 +58,7 @@ export default function ChatButton({
       <motion.button
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.95 }}
-        onClick={() => setIsOpen(true)}
+        onClick={handleOpen}
         className="fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-gradient-to-r from-maroon-600 to-coral-500 text-white shadow-lg hover:shadow-xl transition-shadow flex items-center justify-center"
         aria-label="Open chat"
       >
@@ -107,7 +112,7 @@ export default function ChatButton({
 
               {/* Chat content */}
               <div className="flex-1 overflow-hidden">
-                <ChatBox bookingId={bookingId} currentUserId={currentUserId} />
+                <ChatBox bookingId={bookingId} currentUserId={currentUserId} onRead={() => markRead(bookingId)} />
               </div>
             </motion.div>
           </>
