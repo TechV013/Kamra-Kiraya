@@ -9,7 +9,7 @@ import { useAuthStore } from "@/store/authStore";
 import { format } from "date-fns";
 import {
   Building2, Users, BookOpen, DollarSign, Shield, Clock,
-  CheckCircle2, XCircle, AlertCircle, ChevronRight, TrendingUp, Settings
+  CheckCircle2, XCircle, AlertCircle, ChevronRight, TrendingUp, Settings, ShieldCheck
 } from "lucide-react";
 import RoomImage from "@/components/rooms/RoomImage";
 
@@ -20,6 +20,7 @@ interface AdminStats {
   totalRevenue: number;
   pendingRooms: number;
   activeBookings: number;
+  pendingVerifications: number;
 }
 
 interface RecentBooking {
@@ -174,6 +175,21 @@ export default function AdminDashboardPage() {
             </div>
             <p className="text-sm text-gray-500 dark:text-gray-400">Settings</p>
             <p className="text-lg font-bold text-gray-900 dark:text-white">Platform Config</p>
+          </Link>
+
+          <Link href="/dashboard/admin/verifications" className="group rounded-2xl border border-gray-200 bg-white p-5 shadow-sm hover:shadow-md dark:border-gray-800 dark:bg-gray-900 transition">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400">
+                <ShieldCheck className="w-5 h-5" />
+              </div>
+              {stats && stats.pendingVerifications > 0 && (
+                <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400">
+                  {stats.pendingVerifications}
+                </span>
+              )}
+            </div>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Verifications</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats?.pendingVerifications ?? "—"}</p>
           </Link>
         </div>
 

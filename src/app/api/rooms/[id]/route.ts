@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth, requireRole, apiError, apiResponse } from "@/lib/api-helpers";
+import { getOwnerVerificationStatus, handleExpiredVerification } from "@/lib/check-owner-verification";
 
 // GET /api/rooms/[id]
 export async function GET(
@@ -50,6 +51,17 @@ export async function PUT(
     }
 
     const body = await req.json();
+
+    if (body.status && user!.role === "OWNER") {
+      if (room.status === "INACTIVE" && (body.status === "PENDING" || body.status === "APPROVED")) {
+        await handleExpiredVerification(user!.userId);
+        const verification = await getOwnerVerificationStatus(user!.userId);
+        if (!verification.isVerified) {
+          return apiError("Your account must be verified before publishing rooms. Visit Dashboard > Verification to submit your documents.", 403);
+        }
+      }
+    }
+
     const allowedFields = [
       "title", "description", "address", "city", "state", "zipCode",
       "latitude", "longitude", "priceDaily", "priceMonthly", "roomType",

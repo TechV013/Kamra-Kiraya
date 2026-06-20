@@ -42,6 +42,12 @@ export async function middleware(req: NextRequest) {
       }
     }
 
+    if (pathname.startsWith("/api/owner/")) {
+      if (user.role !== "OWNER" && user.role !== "ADMIN") {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
+    }
+
     if (pathname.startsWith("/api/payments/owner") || pathname.startsWith("/api/bookings/owner") || pathname.startsWith("/api/rooms/my-rooms")) {
       if (user.role !== "OWNER" && user.role !== "ADMIN") {
         return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -78,5 +84,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/api/admin/:path*", "/api/payments/owner", "/api/bookings/owner", "/api/rooms/my-rooms"],
+  matcher: ["/dashboard/:path*", "/api/admin/:path*", "/api/owner/:path*", "/api/payments/owner", "/api/bookings/owner", "/api/rooms/my-rooms"],
 };

@@ -60,3 +60,18 @@ export const paymentVerifySchema = z.object({
   bookingId: z.string().min(1, "Booking ID is required"),
   paymentReference: z.string().regex(/^[A-Za-z0-9\-_.]+$/, "Invalid transaction reference characters").min(8).max(35),
 });
+
+export const verificationSubmitSchema = z.object({
+  aadhaarUrl: z.string().min(1, "Aadhaar document is required"),
+  panUrl: z.string().min(1, "PAN document is required"),
+  propertyProofUrl: z.string().min(1, "Property proof is required"),
+});
+
+export const verificationReviewSchema = z.object({
+  action: z.enum(["approve", "reject"]),
+  rejectionNote: z.string().optional(),
+});
+
+export const roomStatusSchema = z.object({
+  status: z.enum(["PENDING", "APPROVED", "REJECTED", "INACTIVE"]),
+});
