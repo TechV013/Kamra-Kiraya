@@ -5,6 +5,7 @@ import { signToken } from "@/lib/jwt";
 import { apiError, validateBody } from "@/lib/api-helpers";
 import { registerSchema } from "@/lib/validations";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { sendWelcomeEmail } from "@/lib/email";
 
 export async function POST(req: NextRequest) {
   try {
@@ -58,6 +59,8 @@ export async function POST(req: NextRequest) {
         createdAt: true,
       },
     });
+
+    sendWelcomeEmail(user.email, user.name);
 
     const token = signToken({ userId: user.id, email: user.email, role: user.role });
 

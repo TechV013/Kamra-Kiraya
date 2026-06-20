@@ -1,44 +1,114 @@
-const SMTP_HOST = process.env.SMTP_HOST || "";
-const SMTP_PORT = parseInt(process.env.SMTP_PORT || "587");
-const SMTP_USER = process.env.SMTP_USER || "";
-const SMTP_PASS = process.env.SMTP_PASS || "";
-const FROM_EMAIL = process.env.SMTP_FROM || "noreply@kamarakiraya.com";
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+import nodemailer from "nodemailer";
 
-export async function sendPasswordResetEmail(to: string, token: string): Promise<boolean> {
-  const resetUrl = `${APP_URL}/reset-password?token=${token}`;
+const transporter = nodemailer.createTransport({ sendmail: true });
 
-  try {
-    if (SMTP_HOST && SMTP_USER && SMTP_PASS) {
-      const nodemailer = await import("nodemailer");
-      const transporter = nodemailer.default.createTransport({
-        host: SMTP_HOST,
-        port: SMTP_PORT,
-        secure: SMTP_PORT === 465,
-        auth: { user: SMTP_USER, pass: SMTP_PASS },
-      });
-      await transporter.sendMail({
-        from: FROM_EMAIL,
-        to,
-        subject: "Reset your कमरा किराया password",
-        html: `
-          <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px">
-            <h2 style="color:#9f2b33">कमरा किराया</h2>
-            <p>You requested a password reset.</p>
-            <a href="${resetUrl}" style="display:inline-block;padding:12px 24px;background:#9f2b33;color:#fff;border-radius:8px;text-decoration:none;margin:16px 0">
-              Reset Password
-            </a>
-            <p style="color:#666;font-size:14px">This link expires in 1 hour. If you didn't request this, ignore this email.</p>
-          </div>
-        `,
-      });
-      return true;
-    }
+const FROM = "noreply@kamrakiraya.com";
 
-    console.log(`[DEV] Password reset link for ${to}: ${resetUrl}`);
-    return true;
-  } catch (err) {
-    console.error("Failed to send email:", err);
-    return false;
-  }
+function appUrl(): string {
+  return process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+}
+
+function sendMail(to: string, subject: string, html: string): Promise<boolean> {
+  return transporter
+    .sendMail({ from: FROM, to, subject, html })
+    .then(() => true)
+    .catch((err) => {
+      console.error("Email send error:", err);
+      return false;
+    });
+}
+
+export async function sendPasswordResetEmail(email: string, token: string): Promise<boolean> {
+  const link = `${appUrl()}/reset-password?token=${token}`;
+  return sendMail(
+    email,
+    "Reset your कमरा किराया password",
+    `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;">
+      <h1 style="color:#8B1A1A;">Password Reset</h1>
+      <p>Click the button below to reset your password. This link expires in 1 hour.</p>
+      <a href="${link}" style="display:inline-block;padding:12px 24px;background:#8B1A1A;color:#fff;text-decoration:none;border-radius:8px;margin:16px 0;">Reset Password</a>
+      <p style="color:#666;font-size:14px;">If you didn't request this, ignore this email.</p>
+    </div>`
+  );
+}
+
+export async function sendWelcomeEmail(email: string, name: string): Promise<boolean> {
+  return sendMail(
+    email,
+    "Welcome to कमरा किराया!",
+    `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;">
+      <h1 style="color:#8B1A1A;">Welcome, ${name}!</h1>
+      <p>You've successfully created your कमरा किराया account. Start exploring rooms near your college today.</p>
+      <a href="${appUrl()}/browse" style="display:inline-block;padding:12px 24px;background:#8B1A1A;color:#fff;text-decoration:none;border-radius:8px;margin:16px 0;">Browse Rooms</a>
+    </div>`
+  );
+}
+
+export async function sendBookingConfirmationStudent(
+  email: string,
+  name: string,
+  roomTitle: string,
+  bookingId: string,
+  amount: number
+): Promise<boolean> {
+  return sendMail(
+    email,
+    "Booking Confirmed — कमरा किराया",
+    `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;">
+      <h1 style="color:#8B1A1A;">Booking Confirmed!</h1>
+      <p>Hi ${name}, your booking for <strong>${roomTitle}</strong> is confirmed.</p>
+      <p>Amount: <strong>₹${amount}</strong></p>
+      <a href="${appUrl()}/dashboard/student" style="display:inline-block;padding:12px 24px;background:#8B1A1A;color:#fff;text-decoration:none;border-radius:8px;margin:16px 0;">View Booking</a>
+    </div>`
+  );
+}
+
+export async function sendBookingNotificationOwner(
+  email: string,
+  ownerName: string,
+  studentName: string,
+  roomTitle: string
+): Promise<boolean> {
+  return sendMail(
+    email,
+    "New Booking Request — कमरा किराया",
+    `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;">
+      <h1 style="color:#8B1A1A;">New Booking Request</h1>
+      <p>Hi ${ownerName}, <strong>${studentName}</strong> has requested to book <strong>${roomTitle}</strong>.</p>
+      <a href="${appUrl()}/dashboard/owner/bookings" style="display:inline-block;padding:12px 24px;background:#8B1A1A;color:#fff;text-decoration:none;border-radius:8px;margin:16px 0;">View Bookings</a>
+    </div>`
+  );
+}
+
+export async function sendVerificationApproved(
+  email: string,
+  name: string
+): Promise<boolean> {
+  return sendMail(
+    email,
+    "Verification Approved — कमरा किराया",
+    `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;">
+      <h1 style="color:#8B1A1A;">Verification Approved!</h1>
+      <p>Hi ${name}, your documents have been verified. You can now publish rooms on कमरा किराया.</p>
+      <a href="${appUrl()}/dashboard/owner/add-room" style="display:inline-block;padding:12px 24px;background:#8B1A1A;color:#fff;text-decoration:none;border-radius:8px;margin:16px 0;">Add Room</a>
+    </div>`
+  );
+}
+
+export async function sendVerificationRejected(
+  email: string,
+  name: string,
+  reason: string
+): Promise<boolean> {
+  return sendMail(
+    email,
+    "Verification Update — कमरा किराया",
+    `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;">
+      <h1 style="color:#8B1A1A;">Verification Update</h1>
+      <p>Hi ${name}, your verification was not approved.</p>
+      <p style="background:#fef2f2;padding:12px;border-radius:8px;color:#991b1b;"><strong>Reason:</strong> ${reason}</p>
+      <p>Please resubmit your documents with the correct information.</p>
+      <a href="${appUrl()}/dashboard/owner/verification" style="display:inline-block;padding:12px 24px;background:#8B1A1A;color:#fff;text-decoration:none;border-radius:8px;margin:16px 0;">Resubmit</a>
+    </div>`
+  );
 }
