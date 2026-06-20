@@ -20,12 +20,26 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [notifCount, setNotifCount] = useState(0);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  useEffect(() => {
+    if (!token) { setNotifCount(0); return; }
+    const fetch = async () => {
+      try {
+        const res = await axios.get("/api/notifications", { headers: { Authorization: `Bearer ${token}` } });
+        setNotifCount(res.data.unreadCount || 0);
+      } catch {}
+    };
+    fetch();
+    const interval = setInterval(fetch, 30000);
+    return () => clearInterval(interval);
+  }, [token]);
 
   const toggleDark = () => {
     setTheme(theme === "dark" ? "light" : "dark");
@@ -110,6 +124,20 @@ export default function Navbar() {
                 >
                   <LayoutDashboard className="w-4 h-4" />
                   Dashboard
+                </Link>
+
+                {/* Notifications */}
+                <Link
+                  href={dashboardHref === "/dashboard/admin" ? "/dashboard/admin" : dashboardHref}
+                  className="relative p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                  aria-label="Notifications"
+                >
+                  <Bell className="w-4 h-4" />
+                  {notifCount > 0 && (
+                    <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
+                      {notifCount > 9 ? "9+" : notifCount}
+                    </span>
+                  )}
                 </Link>
 
                 {/* User menu */}

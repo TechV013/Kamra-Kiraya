@@ -24,3 +24,9 @@ services:
         value: "8209184926@axl"
       - key: GEMINI_MODEL
         value: "gemini-2.0-flash"
+      - key: SUPABASE_URL
+        value: "https://wmfibigtcaxtedfhehcx.supabase.co"
+      - key: SUPABASE_SERVICE_KEY
+        value: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndtZmliaWd0Y2F4dGVkZmhlaGN4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0NDEwMDIxMywiZXhwIjoyMDU5Njc2MjEzfQ.oKWcLe06qOq_nmBrGZJFeRLTXubGMs2F-fp5cD8JRrY"
+      - key: NEXT_PUBLIC_APP_URL
+        value: "https://student-room-booking-platform.onrender.com"
