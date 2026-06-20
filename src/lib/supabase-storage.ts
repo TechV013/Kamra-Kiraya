@@ -65,5 +65,42 @@ export async function deleteFromSupabase(path: string): Promise<void> {
   }
 }
 
+export async function uploadFile(bucket: string, path: string, buffer: Buffer, contentType: string): Promise<void> {
+  const encodedBucket = encodeURIComponent(bucket);
+  const res = await fetch(`${SUPABASE_URL}/storage/v1/object/${encodedBucket}/${path}`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
+      "Content-Type": contentType,
+    },
+    body: new Uint8Array(buffer),
+  });
+  if (!res.ok) throw new Error(`Upload failed: ${await res.text()}`);
+}
+
+export async function deleteFile(bucket: string, path: string): Promise<void> {
+  const encodedBucket = encodeURIComponent(bucket);
+  const res = await fetch(`${SUPABASE_URL}/storage/v1/object/${encodedBucket}/${path}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${SUPABASE_SERVICE_KEY}` },
+  });
+  if (!res.ok) throw new Error(`Delete failed: ${await res.text()}`);
+}
+
+export async function getSignedUrlForBucket(bucket: string, path: string): Promise<string> {
+  const encodedBucket = encodeURIComponent(bucket);
+  const res = await fetch(`${SUPABASE_URL}/storage/v1/object/sign/${encodedBucket}/${path}`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ expiresIn: 3600 }),
+  });
+  if (!res.ok) throw new Error("Failed to generate signed URL");
+  const { signedURL } = await res.json();
+  return `${SUPABASE_URL}${signedURL}`;
+}
+
 export const ALLOWED_TYPES = ["image/jpeg", "image/png", "application/pdf"];
 export const MAX_FILE_SIZE = 5 * 1024 * 1024;
