@@ -1,12 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useAuthStore } from "@/store/authStore";
+import dynamic from "next/dynamic";
 import type { RoomType } from "@/types";
+
+const RoomMapPicker = dynamic(() => import("@/components/rooms/RoomMapPicker"), { ssr: false });
 
 const ROOM_TYPES: { value: RoomType; label: string }[] = [
   { value: "SINGLE", label: "Single" },
@@ -185,24 +188,16 @@ export default function AddRoomPage() {
                 className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-maroon-500 focus:ring-1 focus:ring-maroon-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
               />
             </label>
-            <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
-              <span>Latitude</span>
-              <input
-                value={latitude}
-                onChange={(event) => setLatitude(event.target.value)}
-                placeholder="12.9716"
-                className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-maroon-500 focus:ring-1 focus:ring-maroon-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+            <div className="lg:col-span-2">
+              <RoomMapPicker
+                latitude={parseFloat(latitude) || 0}
+                longitude={parseFloat(longitude) || 0}
+                onLocationChange={(lat, lng) => {
+                  setLatitude(lat.toString());
+                  setLongitude(lng.toString());
+                }}
               />
-            </label>
-            <label className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
-              <span>Longitude</span>
-              <input
-                value={longitude}
-                onChange={(event) => setLongitude(event.target.value)}
-                placeholder="77.5946"
-                className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-maroon-500 focus:ring-1 focus:ring-maroon-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-              />
-            </label>
+            </div>
           </div>
 
           <div className="grid gap-6 lg:grid-cols-3">

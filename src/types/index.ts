@@ -47,6 +47,7 @@ export interface Room {
   owner?: { id: string; name: string; avatar?: string | null };
   createdAt: string;
   updatedAt: string;
+  distanceKm?: number;
   _count?: { reviews: number };
 }
 
