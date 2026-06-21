@@ -1,9 +1,24 @@
 const ipRequestCounts = new Map<string, { count: number; resetAt: number }>();
+const MAX_ENTRIES = 100;
+const STALE_TTL = 5 * 60_000;
+
+function cleanup() {
+  const now = Date.now();
+  if (ipRequestCounts.size > MAX_ENTRIES) {
+    for (const [ip, entry] of ipRequestCounts) {
+      if (now > entry.resetAt + STALE_TTL) {
+        ipRequestCounts.delete(ip);
+      }
+    }
+  }
+}
 
 export function rateLimit(
   ip: string,
   options: { maxRequests: number; windowMs: number } = { maxRequests: 5, windowMs: 60_000 }
 ): { allowed: boolean; remaining: number; resetIn: number } {
+  if (ipRequestCounts.size >= MAX_ENTRIES) cleanup();
+
   const now = Date.now();
   const entry = ipRequestCounts.get(ip);
 

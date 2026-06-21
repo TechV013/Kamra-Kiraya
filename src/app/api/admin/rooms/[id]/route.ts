@@ -1,13 +1,13 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireRole, apiError, apiResponse } from "@/lib/api-helpers";
+import { auditFromRequest } from "@/lib/audit";
 
-// PATCH /api/admin/rooms/[id] - approve/reject room
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { error } = requireRole(req, ["ADMIN"]);
+  const { error, user } = requireRole(req, ["ADMIN"]);
   if (error) return error;
 
   try {
@@ -23,6 +23,7 @@ export async function PATCH(
       data: { status },
     });
 
+    auditFromRequest(req, user!.userId, "ROOM_UPDATE", "room", id, { newStatus: status, adminAction: true });
     return apiResponse(room);
   } catch (err) {
     console.error("Admin update room error:", err);

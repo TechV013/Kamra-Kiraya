@@ -1,8 +1,19 @@
 import { z } from "zod";
 
+const xssPattern = /<script|javascript:|onerror\s*=|onload\s*=|onclick\s*=/i;
+
+function xssRefine(val: string) {
+  if (xssPattern.test(val)) return false;
+  return true;
+}
+
+const xssMessage = "Input contains blocked patterns";
+
+const emailField = z.string().email("Invalid email format").transform((v) => v.toLowerCase().trim());
+
 export const registerSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters").max(100),
-  email: z.string().email("Invalid email format"),
+  name: z.string().min(2, "Name must be at least 2 characters").max(100).refine(xssRefine, xssMessage),
+  email: emailField,
   password: z
     .string()
     .min(8, "Password must be at least 8 characters")
@@ -16,16 +27,16 @@ export const registerSchema = z.object({
 });
 
 export const loginSchema = z.object({
-  email: z.string().email("Invalid email format"),
+  email: emailField,
   password: z.string().min(1, "Password is required"),
 });
 
 export const roomSchema = z.object({
-  title: z.string().min(3, "Title must be at least 3 characters").max(150),
-  description: z.string().min(10, "Description must be at least 10 characters"),
-  address: z.string().min(5, "Address must be at least 5 characters"),
-  city: z.string().min(2, "City must be at least 2 characters"),
-  state: z.string().min(2, "State must be at least 2 characters"),
+  title: z.string().min(3, "Title must be at least 3 characters").max(150).refine(xssRefine, xssMessage),
+  description: z.string().min(10, "Description must be at least 10 characters").refine(xssRefine, xssMessage),
+  address: z.string().min(5, "Address must be at least 5 characters").refine(xssRefine, xssMessage),
+  city: z.string().min(2, "City must be at least 2 characters").refine(xssRefine, xssMessage),
+  state: z.string().min(2, "State must be at least 2 characters").refine(xssRefine, xssMessage),
   zipCode: z.string().optional().nullable(),
   latitude: z.number().optional().nullable(),
   longitude: z.number().optional().nullable(),
@@ -74,4 +85,20 @@ export const verificationReviewSchema = z.object({
 
 export const roomStatusSchema = z.object({
   status: z.enum(["PENDING", "APPROVED", "REJECTED", "INACTIVE"]),
+});
+
+export const complaintCreateSchema = z.object({
+  bookingId: z.string().optional().nullable(),
+  category: z.enum(["MAINTENANCE", "PAYMENT", "REFUND", "PROPERTY_ISSUE", "HARASSMENT", "FAKE_LISTING", "OTHER"]),
+  title: z.string().min(3, "Title must be at least 3 characters").max(150).refine(xssRefine, xssMessage),
+  description: z.string().min(10, "Description must be at least 10 characters").max(2000).refine(xssRefine, xssMessage),
+});
+
+export const complaintMessageSchema = z.object({
+  message: z.string().min(1, "Message is required").max(2000).refine(xssRefine, xssMessage),
+});
+
+export const complaintStatusSchema = z.object({
+  status: z.enum(["OPEN", "IN_PROGRESS", "ESCALATED", "RESOLVED", "CLOSED"]),
+  note: z.string().min(10, "Please provide a note (at least 10 characters)").max(500).optional().nullable(),
 });

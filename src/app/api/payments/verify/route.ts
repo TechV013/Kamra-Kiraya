@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth, apiError, apiResponse, validateBody } from "@/lib/api-helpers";
 import { paymentVerifySchema } from "@/lib/validations";
+import { auditFromRequest } from "@/lib/audit";
 
 const UPI_TXN_REGEX = /^[A-Za-z0-9\-_.]{8,35}$/;
 
@@ -93,7 +94,7 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    console.log(`Payment submitted for verification: Payment ${paymentId} for booking ${bookingId} with transaction ${paymentReference}`);
+    auditFromRequest(req, user!.userId, "PAYMENT_VERIFY", "payment", paymentId, { bookingId, paymentReference });
 
     return apiResponse({
       success: true,

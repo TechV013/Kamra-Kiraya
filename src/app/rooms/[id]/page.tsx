@@ -38,6 +38,7 @@ export default function RoomDetailPage() {
   const [checkOut, setCheckOut] = useState("");
   const [specialNote, setSpecialNote] = useState("");
   const [booking, setBooking] = useState(false);
+  const [availCheck, setAvailCheck] = useState<{ loading: boolean; available?: boolean; message?: string }>({ loading: false });
   const [paymentSession, setPaymentSession] = useState<{
     paymentId: string;
     bookingId: string;
@@ -71,6 +72,23 @@ export default function RoomDetailPage() {
       .then((r) => setSimilarRooms(r.data.rooms || []))
       .catch(() => {});
   }, [id]);
+
+  useEffect(() => {
+    if (!checkIn || !checkOut || !id) {
+      setAvailCheck({ loading: false });
+      return;
+    }
+    const timer = setTimeout(async () => {
+      setAvailCheck({ loading: true });
+      try {
+        const res = await axios.get(`/api/availability/check?roomId=${id}&checkIn=${checkIn}&checkOut=${checkOut}`);
+        setAvailCheck({ loading: false, available: res.data.available, message: res.data.message });
+      } catch {
+        setAvailCheck({ loading: false, available: false, message: "Could not check availability" });
+      }
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [checkIn, checkOut, id]);
 
   const handleBook = async () => {
     if (!user || !token) {
@@ -534,6 +552,21 @@ export default function RoomDetailPage() {
                     />
                   </div>
 
+                  {/* Availability status */}
+                  {checkIn && checkOut && (
+                    <div className={`rounded-xl p-3 text-sm ${
+                      availCheck.loading ? "bg-gray-50 dark:bg-gray-800 text-gray-500" :
+                      availCheck.available === true ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800" :
+                      availCheck.available === false ? "bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800" :
+                      "bg-gray-50 dark:bg-gray-800"
+                    }`}>
+                      {availCheck.loading ? "Checking availability..." :
+                       availCheck.available === true ? "Dates are available" :
+                       availCheck.available === false ? (availCheck.message || "Dates not available") :
+                       "Select dates to check availability"}
+                    </div>
+                  )}
+
                   {/* Price breakdown */}
                   {checkIn && checkOut && (
                     <div className="bg-maroon-50 dark:bg-maroon-950/30 rounded-xl p-3 space-y-1.5">
@@ -546,10 +579,10 @@ export default function RoomDetailPage() {
 
                   <button
                     onClick={handleBook}
-                    disabled={booking || !room.isAvailable || !!paymentSession}
+                    disabled={booking || !room.isAvailable || !!paymentSession || availCheck.available === false}
                     className="w-full py-3 bg-gradient-to-r from-maroon-600 to-maroon-600 text-white font-semibold rounded-xl hover:opacity-90 disabled:opacity-50 transition-opacity shadow-md"
                   >
-                    {booking ? "Booking..." : paymentSession ? "Payment pending" : !room.isAvailable ? "Not Available" : "Book Now"}
+                    {booking ? "Booking..." : paymentSession ? "Payment pending" : !room.isAvailable ? "Not Available" : availCheck.available === false ? "Not Available" : "Book Now"}
                   </button>
 
                   {paymentSession && (

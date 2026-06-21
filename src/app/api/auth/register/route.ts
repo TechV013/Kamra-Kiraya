@@ -6,6 +6,7 @@ import { apiError, validateBody } from "@/lib/api-helpers";
 import { registerSchema } from "@/lib/validations";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 import { sendWelcomeEmail } from "@/lib/email";
+import { auditFromRequest } from "@/lib/audit";
 
 export async function POST(req: NextRequest) {
   try {
@@ -64,10 +65,12 @@ export async function POST(req: NextRequest) {
 
     const token = signToken({ userId: user.id, email: user.email, role: user.role });
 
+    auditFromRequest(req, user.id, "USER_REGISTER", "user", user.id, { role: user.role });
+
     const response = NextResponse.json({ user, token }, { status: 201 });
     response.cookies.set("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: true,
       sameSite: "lax",
       maxAge: 7 * 24 * 60 * 60,
     });

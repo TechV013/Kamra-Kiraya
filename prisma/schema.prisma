@@ -63,6 +63,24 @@ enum VerificationStatus {
   REJECTED
 }
 
+enum ComplaintCategory {
+  MAINTENANCE
+  PAYMENT
+  REFUND
+  PROPERTY_ISSUE
+  HARASSMENT
+  FAKE_LISTING
+  OTHER
+}
+
+enum ComplaintStatus {
+  OPEN
+  IN_PROGRESS
+  ESCALATED
+  RESOLVED
+  CLOSED
+}
+
 model User {
   id                  String    @id @default(cuid())
   name                String
@@ -90,6 +108,13 @@ model User {
   sentMessages        Message[]
   ownerVerification   OwnerVerification?
   reviewedVerifications OwnerVerification[] @relation("VerificationReviews")
+  complaintsFiled       Complaint[]        @relation("ComplaintsFiled")
+  complaintsReceived    Complaint[]        @relation("ComplaintsReceived")
+  complaintResolutions  Complaint[]        @relation("ComplaintResolution")
+  complaintClosures     Complaint[]        @relation("ComplaintClosure")
+  complaintMessages     ComplaintMessage[]
+  complaintStatusChanges ComplaintStatusHistory[]
+  auditLogs              AuditLog[]
 
   @@map("users")
 }
@@ -122,10 +147,11 @@ model Room {
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
 
-  owner          User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  owner          User              @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   bookings       Booking[]
   reviews        Review[]
   wishlist       Wishlist[]
+  availability   RoomAvailability[]
 
   @@index([city, status])
   @@index([priceDaily, priceMonthly])
@@ -152,6 +178,7 @@ model Booking {
   student     User          @relation(fields: [studentId], references: [id], onDelete: Cascade)
   payment     Payment?
   messages    Message[]
+  complaints Complaint[]
 
   @@map("bookings")
 }
@@ -265,4 +292,105 @@ model OwnerVerification {
 
   @@index([status])
   @@map("owner_verifications")
+}
+
+model Complaint {
+  id              String           @id @default(cuid())
+  bookingId       String?
+  complainantId   String
+  respondentId    String
+  category        ComplaintCategory
+  status          ComplaintStatus  @default(OPEN)
+  title           String
+  description     String
+  attachments     String[]
+  resolution      String?
+  resolvedById    String?
+  closedById      String?
+  escalatedAt     DateTime?
+  resolvedAt      DateTime?
+  closedAt        DateTime?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  complainant     User             @relation("ComplaintsFiled", fields: [complainantId], references: [id], onDelete: Cascade)
+  respondent      User             @relation("ComplaintsReceived", fields: [respondentId], references: [id], onDelete: Cascade)
+  booking         Booking?         @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+  resolver        User?            @relation("ComplaintResolution", fields: [resolvedById], references: [id], onDelete: SetNull)
+  closer          User?            @relation("ComplaintClosure", fields: [closedById], references: [id], onDelete: SetNull)
+  messages        ComplaintMessage[]
+  statusHistory   ComplaintStatusHistory[]
+
+  @@index([complainantId])
+  @@index([respondentId])
+  @@index([status])
+  @@map("complaints")
+}
+
+model ComplaintMessage {
+  id          String   @id @default(cuid())
+  complaintId String
+  senderId    String
+  message     String
+  attachments String[]
+  createdAt   DateTime @default(now())
+
+  complaint   Complaint @relation(fields: [complaintId], references: [id], onDelete: Cascade)
+  sender      User      @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([complaintId])
+  @@map("complaint_messages")
+}
+
+model ComplaintStatusHistory {
+  id          String          @id @default(cuid())
+  complaintId String
+  fromStatus  ComplaintStatus?
+  toStatus    ComplaintStatus
+  changedById String
+  note        String?
+  createdAt   DateTime        @default(now())
+
+  complaint   Complaint       @relation(fields: [complaintId], references: [id], onDelete: Cascade)
+  changedBy   User            @relation(fields: [changedById], references: [id], onDelete: Cascade)
+
+  @@index([complaintId])
+  @@map("complaint_status_history")
+}
+
+model RoomAvailability {
+  id             String   @id @default(cuid())
+  roomId         String
+  date           DateTime
+  availableCount Int      @default(1)
+  reservedCount  Int      @default(0)
+  isBlocked      Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  room           Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@unique([roomId, date])
+  @@index([roomId, date])
+  @@map("room_availability")
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String
+  action    String
+  entity    String
+  entityId  String
+  metadata  Json     @default("{}")
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([action])
+  @@index([entity, entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
 }

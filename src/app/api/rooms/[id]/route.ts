@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth, requireRole, apiError, apiResponse } from "@/lib/api-helpers";
 import { getOwnerVerificationStatus, handleExpiredVerification } from "@/lib/check-owner-verification";
+import { auditFromRequest } from "@/lib/audit";
 
 // GET /api/rooms/[id]
 export async function GET(
@@ -80,6 +81,7 @@ export async function PUT(
       data: filtered,
     });
 
+    auditFromRequest(req, user!.userId, "ROOM_UPDATE", "room", id, { changes: Object.keys(filtered) });
     return apiResponse(updated);
   } catch (err) {
     console.error("Update room error:", err);
@@ -105,6 +107,7 @@ export async function DELETE(
     }
 
     await prisma.room.delete({ where: { id } });
+    auditFromRequest(req, user!.userId, "ROOM_DELETE", "room", id, { title: room.title });
     return apiResponse({ message: "Room deleted" });
   } catch (err) {
     console.error("Delete room error:", err);

@@ -5,6 +5,7 @@ import { signToken } from "@/lib/jwt";
 import { apiError, validateBody } from "@/lib/api-helpers";
 import { loginSchema } from "@/lib/validations";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { auditFromRequest } from "@/lib/audit";
 
 export async function POST(req: NextRequest) {
   try {
@@ -78,10 +79,12 @@ export async function POST(req: NextRequest) {
       createdAt: user.createdAt,
     };
 
+    auditFromRequest(req, user.id, "USER_LOGIN", "user", user.id);
+
     const response = NextResponse.json({ user: userData, token });
     response.cookies.set("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: true,
       sameSite: "lax",
       maxAge: 7 * 24 * 60 * 60,
     });

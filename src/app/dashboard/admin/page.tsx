@@ -9,7 +9,7 @@ import { useAuthStore } from "@/store/authStore";
 import { format } from "date-fns";
 import {
   Building2, Users, BookOpen, DollarSign, Shield, Clock,
-  CheckCircle2, XCircle, AlertCircle, ChevronRight, TrendingUp, Settings, ShieldCheck, BarChart3
+  CheckCircle2, XCircle, AlertCircle, ChevronRight, TrendingUp, Settings, ShieldCheck, BarChart3, AlertTriangle
 } from "lucide-react";
 import RoomImage from "@/components/rooms/RoomImage";
 
@@ -190,6 +190,26 @@ export default function AdminDashboardPage() {
             </div>
             <p className="text-sm text-gray-500 dark:text-gray-400">Verifications</p>
             <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats?.pendingVerifications ?? "—"}</p>
+          </Link>
+
+          <Link href="/dashboard/admin/complaints" className="group rounded-2xl border border-gray-200 bg-white p-5 shadow-sm hover:shadow-md dark:border-gray-800 dark:bg-gray-900 transition">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-100 text-orange-600 dark:bg-orange-900/20 dark:text-orange-400">
+                <AlertTriangle className="w-5 h-5" />
+              </div>
+            </div>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Complaints</p>
+            <p className="text-lg font-bold text-gray-900 dark:text-white">Disputes</p>
+          </Link>
+
+          <Link href="/dashboard/admin/audit-logs" className="group rounded-2xl border border-gray-200 bg-white p-5 shadow-sm hover:shadow-md dark:border-gray-800 dark:bg-gray-900 transition">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400">
+                <Clock className="w-5 h-5" />
+              </div>
+            </div>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Audit Logs</p>
+            <p className="text-lg font-bold text-gray-900 dark:text-white">Activity Trail</p>
           </Link>
 
           <Link href="/dashboard/admin/analytics" className="group rounded-2xl border border-gray-200 bg-white p-5 shadow-sm hover:shadow-md dark:border-gray-800 dark:bg-gray-900 transition">

@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireRole, apiError, apiResponse, validateBody } from "@/lib/api-helpers";
 import { roomSchema } from "@/lib/validations";
 import { getOwnerVerificationStatus, handleExpiredVerification } from "@/lib/check-owner-verification";
+import { auditFromRequest } from "@/lib/audit";
 
 // GET /api/rooms - list rooms with filters
 export async function GET(req: NextRequest) {
@@ -25,6 +26,7 @@ export async function GET(req: NextRequest) {
     const where: Record<string, unknown> = {
       status: "APPROVED",
       isAvailable: true,
+      availableRooms: { gt: 0 },
     };
 
     if (city) where.city = { contains: city, mode: "insensitive" };
@@ -145,6 +147,7 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    auditFromRequest(req, user!.userId, "ROOM_CREATE", "room", room.id, { title: room.title, city: room.city });
     return apiResponse(room, 201);
   } catch (err) {
     console.error("Create room error:", err);
