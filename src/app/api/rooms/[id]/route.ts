@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth, requireRole, apiError, apiResponse } from "@/lib/api-helpers";
 import { getOwnerVerificationStatus, handleExpiredVerification } from "@/lib/check-owner-verification";
+import { getCityImages } from "@/lib/city-images";
 import { auditFromRequest } from "@/lib/audit";
 
 // GET /api/rooms/[id]
@@ -75,6 +76,13 @@ export async function PUT(
     }
     if (filtered.priceDaily !== undefined) filtered.priceDaily = parseFloat(filtered.priceDaily as string);
     if (filtered.priceMonthly !== undefined) filtered.priceMonthly = parseFloat(filtered.priceMonthly as string);
+
+    if (body.images !== undefined) {
+      const cityForImages = filtered.city || room.city;
+      if (Array.isArray(filtered.images) && filtered.images.length === 0) {
+        filtered.images = getCityImages(cityForImages as string);
+      }
+    }
 
     const updated = await prisma.room.update({
       where: { id },
