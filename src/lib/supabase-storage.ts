@@ -102,5 +102,22 @@ export async function getSignedUrlForBucket(bucket: string, path: string): Promi
   return `${SUPABASE_URL}${signedURL}`;
 }
 
+const MAGIC_BYTES: Record<string, Uint8Array[]> = {
+  "image/jpeg": [new Uint8Array([0xFF, 0xD8, 0xFF])],
+  "image/png": [new Uint8Array([0x89, 0x50, 0x4E, 0x47])],
+  "image/webp": [new Uint8Array([0x52, 0x49, 0x46, 0x46])],
+  "application/pdf": [new Uint8Array([0x25, 0x50, 0x44, 0x46])],
+};
+
+export function validateFileSignature(buffer: ArrayBuffer, mimeType: string): boolean {
+  const signatures = MAGIC_BYTES[mimeType];
+  if (!signatures) return true;
+  const view = new Uint8Array(buffer);
+  return signatures.some((sig) => {
+    if (view.length < sig.length) return false;
+    return sig.every((byte, i) => view[i] === byte);
+  });
+}
+
 export const ALLOWED_TYPES = ["image/jpeg", "image/png", "application/pdf"];
 export const MAX_FILE_SIZE = 5 * 1024 * 1024;

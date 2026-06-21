@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireRole, apiError, apiResponse } from "@/lib/api-helpers";
+import { auditFromRequest } from "@/lib/audit";
 
 export async function POST(req: NextRequest) {
   const { error, user } = await requireRole(req, ["OWNER", "ADMIN"]);
@@ -72,6 +73,8 @@ export async function POST(req: NextRequest) {
         },
       });
     }
+
+    auditFromRequest(req, user!.userId, action === "approve" ? "PAYMENT_APPROVE" : "PAYMENT_FAIL", "payment", paymentId, { bookingId: payment.bookingId, action, amount: payment.amount });
 
     return apiResponse({
       success: true,

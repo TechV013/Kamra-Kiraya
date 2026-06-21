@@ -2,8 +2,9 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth, apiError, apiResponse } from "@/lib/api-helpers";
 import { sendBookingConfirmationStudent } from "@/lib/email";
+import { checkAvailability, reserveInventory, releaseInventory } from "@/lib/inventory";
+import { auditFromRequest } from "@/lib/audit";
 
-// GET /api/bookings/[id]
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -43,7 +44,6 @@ export async function GET(
   }
 }
 
-// PATCH /api/bookings/[id] - update status
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -66,27 +66,22 @@ export async function PATCH(
     const isStudent = booking.studentId === user!.userId;
     const isAdmin = user!.role === "ADMIN";
 
-    // Owner cannot approve their own booking
     if (isOwner && isStudent && status === "CONFIRMED") {
       return apiError("You cannot approve your own booking", 403);
     }
 
-    // Students can only cancel
     if (isStudent && !isOwner && status !== "CANCELLED") {
       return apiError("Students can only cancel bookings", 403);
     }
 
-    // Owners can approve, reject, or cancel
     if (isOwner && !["CONFIRMED", "REJECTED", "CANCELLED", "COMPLETED"].includes(status)) {
       return apiError("Invalid status", 400);
     }
 
-    // Can only approve if in pending state
     if (isOwner && status === "CONFIRMED" && booking.status !== "PENDING") {
       return apiError("Can only approve pending requests", 400);
     }
 
-    // Can only reject if in pending state
     if (isOwner && status === "REJECTED" && booking.status !== "PENDING") {
       return apiError("Can only reject pending requests", 400);
     }
@@ -102,18 +97,14 @@ export async function PATCH(
     let roomUpdate = undefined;
 
     if (status === "CONFIRMED" && booking.status !== "CONFIRMED" && booking.status !== "COMPLETED") {
-      // Check for overlapping confirmed/completed bookings right before confirming to prevent race conditions
-      const overlappingBookingsCount = await prisma.booking.count({
-        where: {
-          roomId: booking.roomId,
-          status: { in: ["CONFIRMED", "COMPLETED"] },
-          checkIn: { lt: booking.checkOut },
-          checkOut: { gt: booking.checkIn },
-        },
-      });
-
-      if (overlappingBookingsCount >= booking.room.totalRooms) {
+      const availability = await checkAvailability(booking.roomId, booking.checkIn, booking.checkOut, booking.id);
+      if (!availability.available) {
         return apiError("Cannot confirm booking: room is fully booked for these dates", 400);
+      }
+
+      const reserved = await reserveInventory(booking.roomId, booking.checkIn, booking.checkOut, booking.id);
+      if (!reserved) {
+        return apiError("Failed to reserve inventory for this booking", 500);
       }
 
       roomUpdate = {
@@ -123,6 +114,8 @@ export async function PATCH(
         },
       };
     } else if (status === "CANCELLED" && (booking.status === "CONFIRMED" || booking.status === "COMPLETED")) {
+      await releaseInventory(booking.roomId, booking.checkIn, booking.checkOut);
+
       roomUpdate = {
         update: {
           availableRooms: { increment: 1 },
@@ -142,6 +135,12 @@ export async function PATCH(
 
     if (status === "CONFIRMED" && booking.status !== "CONFIRMED") {
       sendBookingConfirmationStudent(updated.student.email, updated.student.name, updated.room.title, id, updated.totalAmount);
+    }
+
+    const statusToAction: Record<string, string> = { CONFIRMED: "BOOKING_APPROVE", CANCELLED: "BOOKING_CANCEL", REJECTED: "BOOKING_REJECT", COMPLETED: "BOOKING_COMPLETE" };
+    const auditAction = statusToAction[status];
+    if (auditAction) {
+      auditFromRequest(req, user!.userId, auditAction as any, "booking", id, { previousStatus: booking.status, newStatus: status });
     }
 
     return apiResponse(updated);

@@ -1,8 +1,10 @@
 import crypto from "crypto";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth, apiError, apiResponse, validateBody } from "@/lib/api-helpers";
 import { paymentSchema } from "@/lib/validations";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { auditFromRequest } from "@/lib/audit";
 
 const buildUpiPayload = (amount: number, bookingId: string, ownerUpiId: string, ownerUpiName: string) => {
   const note = process.env.UPI_NOTE || `Booking ${bookingId}`;
@@ -52,6 +54,15 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const { error, user } = requireAuth(req);
   if (error) return error;
+
+  const ip = getClientIp(req);
+  const limit = rateLimit(ip, { maxRequests: 5, windowMs: 60_000 });
+  if (!limit.allowed) {
+    return NextResponse.json(
+      { error: "Too many payment requests. Try again later." },
+      { status: 429, headers: { "Retry-After": String(Math.ceil(limit.resetIn / 1000)) } }
+    );
+  }
 
   try {
     const { data, errorResponse } = await validateBody(req, paymentSchema);
@@ -133,6 +144,8 @@ export async function POST(req: NextRequest) {
       payment.amount, bookingId,
       owner.upiId, owner.upiName || owner.name,
     );
+
+    auditFromRequest(req, user!.userId, "PAYMENT_CREATE", "payment", payment.id, { bookingId, amount: payment.amount, platformFee, ownerPayout });
 
     return apiResponse({
       paymentId: payment.id,

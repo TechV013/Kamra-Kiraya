@@ -6,7 +6,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import {
   Building2, Plus, Edit, Trash2, Users, BookOpen, DollarSign,
-  Clock, CheckCircle, XCircle, Eye, MapPin, Star, TrendingUp, AlertCircle, CreditCard, Shield
+  Clock, CheckCircle, XCircle, Eye, MapPin, Star, TrendingUp, AlertCircle, CreditCard, Shield, AlertTriangle, Calendar
 } from "lucide-react";
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -256,6 +256,20 @@ export default function OwnerDashboard() {
           >
             <CreditCard className="w-4 h-4" />
             Payment Settings
+          </Link>
+          <Link
+            href="/dashboard/owner/availability"
+            className="inline-flex items-center gap-2 rounded-xl bg-teal-50 border border-teal-200 px-4 py-2.5 text-sm font-medium text-teal-700 hover:bg-teal-100 dark:bg-teal-900/20 dark:border-teal-800 dark:text-teal-300 transition"
+          >
+            <Calendar className="w-4 h-4" />
+            Availability
+          </Link>
+          <Link
+            href="/dashboard/owner/complaints"
+            className="inline-flex items-center gap-2 rounded-xl bg-orange-50 border border-orange-200 px-4 py-2.5 text-sm font-medium text-orange-700 hover:bg-orange-100 dark:bg-orange-900/20 dark:border-orange-800 dark:text-orange-300 transition"
+          >
+            <AlertTriangle className="w-4 h-4" />
+            Complaints
           </Link>
           <Link
             href="/dashboard/owner/analytics"

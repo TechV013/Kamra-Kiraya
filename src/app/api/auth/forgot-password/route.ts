@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { apiError, apiResponse } from "@/lib/api-helpers";
 import { sendPasswordResetEmail } from "@/lib/email";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { auditFromRequest } from "@/lib/audit";
 
 export async function POST(req: NextRequest) {
   try {
@@ -43,6 +44,7 @@ export async function POST(req: NextRequest) {
       return apiError("Failed to send email. Try again later.", 500);
     }
 
+    auditFromRequest(req, user.id, "PASSWORD_RESET_REQUEST", "user", user.id, { email });
     return apiResponse({ message: "If that email exists, a reset link has been sent." });
   } catch (err) {
     console.error("Forgot password error:", err);
@@ -86,6 +88,7 @@ export async function PATCH(req: NextRequest) {
       },
     });
 
+    auditFromRequest(req, user.id, "PASSWORD_RESET", "user", user.id);
     return apiResponse({ message: "Password has been reset successfully. You can now log in." });
   } catch (err) {
     console.error("Reset password error:", err);

@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireRole, apiError, apiResponse } from "@/lib/api-helpers";
 import { getSignedUrl } from "@/lib/supabase-storage";
 import { sendVerificationApproved, sendVerificationRejected } from "@/lib/email";
+import { auditFromRequest } from "@/lib/audit";
 
 const DETAIL_SELECT = {
   id: true, ownerId: true, status: true,
@@ -97,6 +98,7 @@ export async function PUT(
 
       sendVerificationApproved(ownerEmail, ownerName);
 
+      auditFromRequest(req, user!.userId, "VERIFICATION_REVIEW", "verification", params.id, { action: "approve" });
       return apiResponse({ success: true, status: "VERIFIED" });
     }
 
@@ -125,6 +127,7 @@ export async function PUT(
 
       sendVerificationRejected(ownerEmail, ownerName, rejectionNote);
 
+      auditFromRequest(req, user!.userId, "VERIFICATION_REVIEW", "verification", params.id, { action: "reject", rejectionNote });
       return apiResponse({ success: true, status: "REJECTED" });
   } catch (err) {
     console.error("Review verification error:", err);

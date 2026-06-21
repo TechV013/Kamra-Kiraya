@@ -112,3 +112,57 @@ export async function sendVerificationRejected(
     </div>`
   );
 }
+
+export async function sendComplaintFiled(
+  email: string,
+  name: string,
+  complainantName: string,
+  title: string,
+  complaintId: string,
+  role: "owner" | "student"
+): Promise<boolean> {
+  const dashboard = role === "owner" ? "/dashboard/owner/complaints" : "/dashboard/student/complaints";
+  return sendMail(
+    email,
+    "Complaint Filed — कमरा किराया",
+    `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;">
+      <h1 style="color:#8B1A1A;">Complaint Filed</h1>
+      <p>Hi ${name}, <strong>${complainantName}</strong> has filed a complaint regarding "<strong>${title}</strong>".</p>
+      <a href="${appUrl()}${dashboard}/${complaintId}" style="display:inline-block;padding:12px 24px;background:#8B1A1A;color:#fff;text-decoration:none;border-radius:8px;margin:16px 0;">View Complaint</a>
+    </div>`
+  );
+}
+
+export async function sendComplaintResolved(
+  email: string,
+  name: string,
+  title: string,
+  complaintId: string
+): Promise<boolean> {
+  return sendMail(
+    email,
+    "Complaint Resolved — कमरा किराया",
+    `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;">
+      <h1 style="color:#8B1A1A;">Complaint Resolved</h1>
+      <p>Hi ${name}, the complaint regarding "<strong>${title}</strong>" has been resolved.</p>
+      <a href="${appUrl()}/dashboard/student/complaints/${complaintId}" style="display:inline-block;padding:12px 24px;background:#8B1A1A;color:#fff;text-decoration:none;border-radius:8px;margin:16px 0;">View Details</a>
+    </div>`
+  );
+}
+
+export async function sendComplaintEscalated(
+  email: string,
+  name: string,
+  title: string,
+  complaintId: string
+): Promise<boolean> {
+  return sendMail(
+    email,
+    "Complaint Escalated — कमरा किराया",
+    `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;">
+      <h1 style="color:#8B1A1A;">Complaint Escalated</h1>
+      <p>Hi ${name}, the complaint regarding "<strong>${title}</strong>" has been escalated to admin review.</p>
+      <a href="${appUrl()}/dashboard/student/complaints/${complaintId}" style="display:inline-block;padding:12px 24px;background:#8B1A1A;color:#fff;text-decoration:none;border-radius:8px;margin:16px 0;">View Details</a>
+    </div>`
+  );
+}

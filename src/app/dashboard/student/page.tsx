@@ -6,7 +6,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import {
   BookOpen, Heart, User, Clock, CheckCircle, XCircle,
-  MapPin, Calendar, ChevronRight, Building2, Star, Search, CreditCard, MessageCircle
+  MapPin, Calendar, ChevronRight, Building2, Star, Search, CreditCard, MessageCircle, AlertTriangle
 } from "lucide-react";
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -166,6 +166,7 @@ export default function StudentDashboard() {
             { href: "/browse", icon: Search, label: "Browse Rooms", desc: "Find your next home", color: "from-maroon-500 to-maroon-600" },
             { href: "/dashboard/student/wishlist", icon: Heart, label: "My Wishlist", desc: "Saved rooms", color: "from-rose-500 to-pink-600" },
             { href: "/dashboard/student/payments", icon: CreditCard, label: "Payments", desc: "View QR & history", color: "from-emerald-500 to-teal-600" },
+            { href: "/dashboard/student/complaints", icon: AlertTriangle, label: "My Complaints", desc: "Report issues", color: "from-orange-500 to-red-600" },
           ].map((link) => (
             <Link key={link.href} href={link.href}>
               <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow flex items-center gap-4">

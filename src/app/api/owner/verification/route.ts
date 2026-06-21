@@ -4,6 +4,7 @@ import { requireRole, apiError, apiResponse, validateBody } from "@/lib/api-help
 import { verificationSubmitSchema } from "@/lib/validations";
 import { getSignedUrl, deleteFromSupabase } from "@/lib/supabase-storage";
 import { notifyAdmins, getOwnerVerificationStatus } from "@/lib/check-owner-verification";
+import { auditFromRequest } from "@/lib/audit";
 
 const VERIFICATION_SELECT = {
   id: true, ownerId: true, status: true,
@@ -102,6 +103,7 @@ export async function POST(req: NextRequest) {
       `${ownerName} has submitted verification documents for review.`
     );
 
+    auditFromRequest(req, user!.userId, "VERIFICATION_SUBMIT", "verification", record.id);
     return apiResponse(record, 201);
   } catch (err) {
     console.error("Submit verification error:", err);
