@@ -70,6 +70,7 @@ export default function RoomCard({ room, index = 0 }: RoomCardProps) {
             <RoomImage
               src={room.images?.[0]}
               alt={room.title}
+              city={room.city}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
             {/* Badge */}

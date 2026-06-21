@@ -1,17 +1,18 @@
 "use client";
 
 import { useState } from "react";
-
-const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=400&q=80";
+import { getCityFallbackImage } from "@/lib/city-images";
 
 interface RoomImageProps {
   src?: string | null;
   alt: string;
   className?: string;
+  city?: string | null;
 }
 
-export default function RoomImage({ src, alt, className = "" }: RoomImageProps) {
-  const [imgSrc, setImgSrc] = useState(src || FALLBACK_IMAGE);
+export default function RoomImage({ src, alt, className = "", city }: RoomImageProps) {
+  const fallback = getCityFallbackImage(city);
+  const [imgSrc, setImgSrc] = useState(src || fallback);
   const [tried, setTried] = useState(false);
 
   return (
@@ -23,7 +24,7 @@ export default function RoomImage({ src, alt, className = "" }: RoomImageProps) 
       onError={() => {
         if (!tried) {
           setTried(true);
-          setImgSrc(FALLBACK_IMAGE);
+          setImgSrc(fallback);
         }
       }}
     />
