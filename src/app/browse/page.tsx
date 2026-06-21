@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
 import { Search, Filter, SlidersHorizontal, X, Grid3X3, List, Map as MapIcon, Building2, Navigation } from "lucide-react";
 import axios from "axios";
@@ -58,6 +58,9 @@ export default function BrowsePage() {
   const [distanceRadius, setDistanceRadius] = useState(5);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [locationError, setLocationError] = useState("");
+
+  // Track if URL params have been initialized (prevent override after user interaction)
+  const initialized = useRef(false);
 
   const fetchRooms = useCallback(
     async (
@@ -124,20 +127,38 @@ export default function BrowsePage() {
     }
     setLocationError("");
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
+      async (pos) => {
         const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
         setUserLocation(loc);
         setNearbyMode(true);
         setSortBy("nearest");
+        setLoading(true);
+        try {
+          const res = await axios.get(`/api/rooms/nearby?lat=${loc.lat}&lng=${loc.lng}&radius=${distanceRadius}&limit=50`);
+          setRooms(res.data.rooms || []);
+          setTotal(res.data.rooms?.length || 0);
+          setTotalPages(1);
+          setPage(1);
+        } catch {
+          setRooms([]);
+        } finally {
+          setLoading(false);
+        }
       },
       () => {
         setLocationError("Could not get location. Please allow location access.");
       },
       { enableHighAccuracy: true, timeout: 10000 }
     );
-  }, []);
+  }, [distanceRadius]);
 
   useEffect(() => {
+    if (initialized.current) {
+      fetchRooms(1);
+      return;
+    }
+    initialized.current = true;
+
     const params = new URLSearchParams(window.location.search);
     const initialSearch = params.get("search") || "";
     const initialCity = params.get("city") || "";

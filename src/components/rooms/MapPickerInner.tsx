@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 
 const markerIcon = new L.Icon({
@@ -40,8 +41,10 @@ function DraggableMarker({
       const newPos = L.latLng(initialLat, initialLng);
       setPosition(newPos);
       map.setView(newPos, map.getZoom());
+    } else if (center.lat && center.lng) {
+      setPosition(L.latLng(center.lat, center.lng));
     }
-  }, [initialLat, initialLng]);
+  }, [initialLat, initialLng, center.lat, center.lng]);
 
   return (
     <Marker
@@ -63,8 +66,8 @@ function DraggableMarker({
 function SetViewOnMount({ center }: { center: { lat: number; lng: number } }) {
   const map = useMap();
   useEffect(() => {
-    map.setView([center.lat, center.lng], 10);
-  }, []);
+    map.setView([center.lat, center.lng], map.getZoom() || 10);
+  }, [center.lat, center.lng]);
   return null;
 }
 

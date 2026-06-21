@@ -16,6 +16,7 @@ import { useAuthStore } from "@/store/authStore";
 import { useWishlistStore } from "@/store/uiStore";
 import RoomCard from "@/components/rooms/RoomCard";
 import { RoomCardSkeleton } from "@/components/shared/Skeletons";
+import RoomLocationMap from "@/components/rooms/RoomLocationMap";
 
 const AMENITY_ICONS: Record<string, React.ReactNode> = {
   WiFi: <Wifi className="w-4 h-4" />,
@@ -404,6 +405,29 @@ export default function RoomDetailPage() {
                     )}
                   </div>
                 </div>
+              </div>
+            )}
+
+            {/* Location Map */}
+            {room.latitude && room.longitude && (
+              <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-100 dark:border-gray-700">
+                <h2 className="font-bold text-gray-900 dark:text-white text-lg mb-4">Location</h2>
+                <div className="h-48 rounded-xl overflow-hidden">
+                  <RoomLocationMap
+                    latitude={room.latitude}
+                    longitude={room.longitude}
+                    title={room.title}
+                  />
+                </div>
+                <a
+                  href={`https://www.openstreetmap.org/?mlat=${room.latitude}&mlon=${room.longitude}&zoom=15`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-2 inline-flex items-center gap-1 text-xs text-maroon-600 dark:text-maroon-400 hover:underline"
+                >
+                  <MapPin className="w-3 h-3" />
+                  Open in OpenStreetMap
+                </a>
               </div>
             )}
 
