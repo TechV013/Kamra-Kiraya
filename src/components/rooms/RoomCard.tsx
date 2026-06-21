@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { Heart, MapPin, Star, Users, Wifi, Car, Coffee } from "lucide-react";
+import { Heart, MapPin, Star, Users, Wifi, Car, Coffee, Navigation } from "lucide-react";
 import type { Room } from "@/types";
 import { useAuthStore } from "@/store/authStore";
 import { useWishlistStore } from "@/store/uiStore";
@@ -90,6 +90,15 @@ export default function RoomCard({ room, index = 0 }: RoomCardProps) {
                 }`}
               />
             </button>
+            {/* Distance badge */}
+            {room.distanceKm && (
+              <div className="absolute bottom-3 left-3">
+                <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">
+                  <Navigation className="w-3 h-3" />
+                  {room.distanceKm} km
+                </span>
+              </div>
+            )}
             {/* Available indicator */}
             <div className="absolute bottom-3 right-3">
               <span

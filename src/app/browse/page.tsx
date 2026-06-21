@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Search, Filter, SlidersHorizontal, X, Grid3X3, List, Map as MapIcon, Building2 } from "lucide-react";
+import { Search, Filter, SlidersHorizontal, X, Grid3X3, List, Map as MapIcon, Building2, Navigation } from "lucide-react";
 import axios from "axios";
 import type { Room, RoomType } from "@/types";
 import RoomCard from "@/components/rooms/RoomCard";
@@ -25,6 +25,14 @@ const SORT_OPTIONS = [
   { value: "createdAt", label: "Latest" },
   { value: "price", label: "Price: Low to High" },
   { value: "rating", label: "Top Rated" },
+  { value: "nearest", label: "Nearest" },
+];
+
+const DISTANCE_OPTIONS = [
+  { value: 1, label: "Within 1 km" },
+  { value: 3, label: "Within 3 km" },
+  { value: 5, label: "Within 5 km" },
+  { value: 10, label: "Within 10 km" },
 ];
 
 export default function BrowsePage() {
@@ -45,6 +53,12 @@ export default function BrowsePage() {
   const [maxPrice, setMaxPrice] = useState("");
   const [sortBy, setSortBy] = useState("createdAt");
 
+  // Nearby state
+  const [nearbyMode, setNearbyMode] = useState(false);
+  const [distanceRadius, setDistanceRadius] = useState(5);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [locationError, setLocationError] = useState("");
+
   const fetchRooms = useCallback(
     async (
       pg = 1,
@@ -60,6 +74,16 @@ export default function BrowsePage() {
     ) => {
       setLoading(true);
       try {
+        if (filters.sortBy === "nearest" && userLocation) {
+          const res = await axios.get(`/api/rooms/nearby?lat=${userLocation.lat}&lng=${userLocation.lng}&radius=${distanceRadius}&limit=50`);
+          setRooms(res.data.rooms || []);
+          setTotal(res.data.rooms?.length || 0);
+          setTotalPages(1);
+          setPage(1);
+          setLoading(false);
+          return;
+        }
+
         const params = new URLSearchParams();
         const querySearch = filters.search ?? search;
         const queryCity = filters.city ?? city;
@@ -90,8 +114,28 @@ export default function BrowsePage() {
         setLoading(false);
       }
     },
-    [search, city, roomType, bookingType, minPrice, maxPrice, sortBy]
+    [search, city, roomType, bookingType, minPrice, maxPrice, sortBy, userLocation, distanceRadius]
   );
+
+  const handleGetLocation = useCallback(() => {
+    if (!("geolocation" in navigator)) {
+      setLocationError("Geolocation not supported in your browser");
+      return;
+    }
+    setLocationError("");
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        setUserLocation(loc);
+        setNearbyMode(true);
+        setSortBy("nearest");
+      },
+      () => {
+        setLocationError("Could not get location. Please allow location access.");
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  }, []);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -130,6 +174,9 @@ export default function BrowsePage() {
     setMinPrice("");
     setMaxPrice("");
     setSortBy("createdAt");
+    setNearbyMode(false);
+    setUserLocation(null);
+    setLocationError("");
   };
 
   const hasFilters = search || city || roomType || bookingType || minPrice || maxPrice;
@@ -162,6 +209,19 @@ export default function BrowsePage() {
               onKeyDown={(e) => e.key === "Enter" && fetchRooms(1)}
               className="w-full md:w-36 px-4 py-2.5 bg-gray-100 dark:bg-gray-800 rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-400 outline-none"
             />
+
+            {/* Nearby */}
+            <button
+              onClick={handleGetLocation}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                nearbyMode
+                  ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300"
+                  : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200"
+              }`}
+            >
+              <Navigation className="w-4 h-4" />
+              {nearbyMode ? `${distanceRadius} km` : "Nearby"}
+            </button>
 
             {/* Sort */}
             <select
@@ -216,7 +276,7 @@ export default function BrowsePage() {
           </div>
 
           {/* Expanded Filters */}
-          {filtersOpen && (
+          {(filtersOpen || nearbyMode) && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
@@ -256,6 +316,28 @@ export default function BrowsePage() {
                   </button>
                 ))}
               </div>
+
+              {/* Distance filter */}
+              {nearbyMode && (
+                <div className="flex flex-wrap gap-1.5">
+                  {DISTANCE_OPTIONS.map((d) => (
+                    <button
+                      key={d.value}
+                      onClick={() => {
+                        setDistanceRadius(d.value);
+                        setSortBy("nearest");
+                      }}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                        distanceRadius === d.value
+                          ? "bg-emerald-600 text-white"
+                          : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200"
+                      }`}
+                    >
+                      {d.label}
+                    </button>
+                  ))}
+                </div>
+              )}
 
               {/* Price range */}
               <div className="flex items-center gap-2">
