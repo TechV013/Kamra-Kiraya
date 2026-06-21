@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
       include: {
         booking: {
           include: {
-            room: { select: { id: true, title: true, images: true } },
+            room: { select: { id: true, title: true, images: true, city: true, ownerId: true, owner: { select: { name: true, upiId: true, upiName: true } } } },
             student: { select: { id: true, name: true, email: true } },
           },
         },

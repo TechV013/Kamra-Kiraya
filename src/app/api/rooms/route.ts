@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireRole, apiError, apiResponse, validateBody } from "@/lib/api-helpers";
 import { roomSchema } from "@/lib/validations";
 import { getOwnerVerificationStatus, handleExpiredVerification } from "@/lib/check-owner-verification";
+import { getCityImages } from "@/lib/city-images";
 import { auditFromRequest } from "@/lib/audit";
 
 // GET /api/rooms - list rooms with filters
@@ -110,6 +111,8 @@ export async function POST(req: NextRequest) {
       rules,
     } = data!;
 
+    const finalImages = images.length > 0 ? images : getCityImages(city);
+
     let statusValue = process.env.NODE_ENV === "development" ? "APPROVED" : "PENDING";
 
     if (user!.role === "OWNER") {
@@ -136,7 +139,7 @@ export async function POST(req: NextRequest) {
         maxOccupancy,
         totalRooms,
         availableRooms: totalRooms,
-        images,
+        images: finalImages,
         amenities,
         rules,
         ownerId: user!.userId,

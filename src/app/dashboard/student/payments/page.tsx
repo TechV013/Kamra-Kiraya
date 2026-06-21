@@ -22,11 +22,17 @@ interface PaymentRecord {
     id: string;
     checkIn: string;
     checkOut: string;
-    room: {
-      id: string;
-      title: string;
-      images: string[];
-    };
+      room: {
+        id: string;
+        title: string;
+        images: string[];
+        city: string;
+        owner: {
+          name: string;
+          upiId: string | null;
+          upiName: string | null;
+        };
+      };
   };
 }
 
@@ -245,7 +251,7 @@ export default function PaymentsPage() {
 
             <div className="grid place-items-center bg-gray-100 dark:bg-gray-700 rounded-xl p-4">
               <img
-                src={`/api/qr?paymentId=${selectedPayment.id}&amount=${selectedPayment.amount}`}
+                src={`/api/qr?paymentId=${selectedPayment.id}&amount=${selectedPayment.amount}&upiId=${selectedPayment.booking.room.owner.upiId || ""}&payeeName=${encodeURIComponent(selectedPayment.booking.room.owner.upiName || selectedPayment.booking.room.owner.name)}`}
                 alt="UPI QR code"
                 className="w-64 h-64 rounded-lg"
               />
@@ -265,10 +271,10 @@ export default function PaymentsPage() {
               <div className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                 <span className="text-gray-600 dark:text-gray-300">UPI ID</span>
                 <button
-                  onClick={() => copyToClipboard(process.env.NEXT_PUBLIC_UPI_ID || "")}
+                  onClick={() => copyToClipboard(selectedPayment.booking.room.owner.upiId || "")}
                   className="text-maroon-600 dark:text-maroon-400 hover:underline font-mono text-xs flex items-center gap-1"
                 >
-                  {process.env.NEXT_PUBLIC_UPI_ID} <Copy className="w-3 h-3" />
+                  {selectedPayment.booking.room.owner.upiId || "N/A"} <Copy className="w-3 h-3" />
                 </button>
               </div>
             </div>
