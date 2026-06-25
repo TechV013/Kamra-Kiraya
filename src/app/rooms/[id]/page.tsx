@@ -615,7 +615,7 @@ export default function RoomDetailPage() {
                       <p className="text-sm text-gray-600 dark:text-gray-300">Scan with any UPI app or payment app and pay the exact amount.</p>
                       <div className="grid place-items-center">
                         <img
-                          src={`/api/qr?paymentId=${paymentSession.paymentId}&amount=${paymentSession.amount}`}
+                          src={`/api/qr?paymentId=${paymentSession.paymentId}&amount=${paymentSession.amount}&upiId=${encodeURIComponent(paymentSession.upiId || "")}&payeeName=${encodeURIComponent(paymentSession.payeeName || "Kamra Kiraya")}`}
                           alt="UPI QR code"
                           className="w-64 h-64 rounded-2xl border border-gray-200 dark:border-gray-700"
                         />

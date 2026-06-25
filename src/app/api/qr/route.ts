@@ -9,12 +9,16 @@ export async function GET(req: NextRequest) {
     const ownerUpiId = searchParams.get("upiId");
     const payeeName = searchParams.get("payeeName") || "Kamra Kiraya";
 
-    if (!paymentId || !amount) {
-      return new Response("Missing paymentId or amount", { status: 400 });
+    if (!ownerUpiId && !process.env.UPI_ID) {
+      return new Response("Missing upiId — no UPI ID configured", { status: 400 });
+    }
+    if (!amount) {
+      return new Response("Missing amount", { status: 400 });
     }
 
-    const upiId = ownerUpiId || process.env.UPI_ID || "";
-    const note = process.env.UPI_NOTE || `Payment ${paymentId}`;
+    const upiId = ownerUpiId || process.env.UPI_ID!;
+    const note = process.env.UPI_NOTE || `Payment ${paymentId || "preview"}`;
+    const txnRef = paymentId ? `payment_${paymentId}` : `preview_${Date.now()}`;
 
     const params = new URLSearchParams({
       pa: upiId,
@@ -22,7 +26,7 @@ export async function GET(req: NextRequest) {
       am: parseFloat(amount).toFixed(2),
       cu: "INR",
       tn: note,
-      tr: `payment_${paymentId}`,
+      tr: txnRef,
     });
 
     const upiPayload = `upi://pay?${params.toString()}`;
