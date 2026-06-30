@@ -28,13 +28,12 @@ const STATUS_STYLES: Record<string, string> = {
 };
 
 const CATEGORY_LABELS: Record<string, string> = {
-  NOISE: "Noise Disturbance",
   MAINTENANCE: "Maintenance Issue",
-  HYGIENE: "Hygiene Problem",
-  BILLING: "Billing Dispute",
-  SECURITY: "Security Concern",
+  PAYMENT: "Payment Dispute",
+  REFUND: "Refund Request",
+  PROPERTY_ISSUE: "Property Issue",
   HARASSMENT: "Harassment",
-  ROOM_CONDITION: "Room Condition",
+  FAKE_LISTING: "Fake Listing",
   OTHER: "Other",
 };
 

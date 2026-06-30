@@ -9,13 +9,12 @@ import { AlertTriangle, ArrowLeft, Send } from "lucide-react";
 import Link from "next/link";
 
 const CATEGORIES = [
-  { value: "NOISE", label: "Noise Disturbance" },
   { value: "MAINTENANCE", label: "Maintenance Issue" },
-  { value: "HYGIENE", label: "Hygiene Problem" },
-  { value: "BILLING", label: "Billing Dispute" },
-  { value: "SECURITY", label: "Security Concern" },
+  { value: "PAYMENT", label: "Payment Dispute" },
+  { value: "REFUND", label: "Refund Request" },
+  { value: "PROPERTY_ISSUE", label: "Property Issue" },
   { value: "HARASSMENT", label: "Harassment" },
-  { value: "ROOM_CONDITION", label: "Room Condition" },
+  { value: "FAKE_LISTING", label: "Fake Listing" },
   { value: "OTHER", label: "Other" },
 ];
 
@@ -58,6 +57,10 @@ export default function NewComplaintPage() {
       toast.error("Title and description are required");
       return;
     }
+    if (!bookingId) {
+      toast.error("Please select a related booking");
+      return;
+    }
     setSubmitting(true);
     try {
       const res = await axios.post("/api/complaints", { bookingId: bookingId || undefined, category, title: title.trim(), description: description.trim() }, { headers: { Authorization: `Bearer ${token}` } });
@@ -85,9 +88,9 @@ export default function NewComplaintPage() {
 
           <form onSubmit={handleSubmit} className="p-6 space-y-5">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Related Booking (optional)</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Related Booking *</label>
               <select value={bookingId} onChange={(e) => setBookingId(e.target.value)} className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-maroon-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white">
-                <option value="">No specific booking</option>
+                <option value="">Select a booking</option>
                 {bookings.map((b) => (
                   <option key={b.id} value={b.id}>{b.room.title} — {b.owner?.name || "Owner"} ({b.status})</option>
                 ))}
