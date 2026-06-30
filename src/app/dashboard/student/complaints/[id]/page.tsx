@@ -40,9 +40,8 @@ interface ComplaintDetail {
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
-  NOISE: "Noise Disturbance", MAINTENANCE: "Maintenance Issue", HYGIENE: "Hygiene Problem",
-  BILLING: "Billing Dispute", SECURITY: "Security Concern", HARASSMENT: "Harassment",
-  ROOM_CONDITION: "Room Condition", OTHER: "Other",
+  MAINTENANCE: "Maintenance Issue", PAYMENT: "Payment Dispute", REFUND: "Refund Request",
+  PROPERTY_ISSUE: "Property Issue", HARASSMENT: "Harassment", FAKE_LISTING: "Fake Listing", OTHER: "Other",
 };
 
 const STATUS_STYLES: Record<string, string> = {

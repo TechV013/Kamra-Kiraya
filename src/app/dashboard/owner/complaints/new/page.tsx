@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useAuthStore } from "@/store/authStore";
-import { AlertTriangle, ArrowLeft, Send } from "lucide-react";
+import { ArrowLeft, Send } from "lucide-react";
 import Link from "next/link";
 
 const CATEGORIES = [
@@ -22,10 +22,10 @@ interface BookingOption {
   id: string;
   status: string;
   room: { title: string; city: string };
-  owner: { name: string };
+  student: { name: string };
 }
 
-export default function NewComplaintPage() {
+export default function OwnerNewComplaintPage() {
   const router = useRouter();
   const { user, token, hasHydrated } = useAuthStore();
   const [bookings, setBookings] = useState<BookingOption[]>([]);
@@ -38,13 +38,13 @@ export default function NewComplaintPage() {
   useEffect(() => {
     if (!hasHydrated) return;
     if (!token) { router.push("/login"); return; }
-    if (user?.role !== "STUDENT") { router.push("/"); return; }
+    if (user?.role !== "OWNER") { router.push("/"); return; }
     fetchBookings();
   }, [hasHydrated, token, user, router]);
 
   const fetchBookings = async () => {
     try {
-      const res = await axios.get("/api/bookings", { headers: { Authorization: `Bearer ${token}` } });
+      const res = await axios.get("/api/bookings/owner", { headers: { Authorization: `Bearer ${token}` } });
       setBookings(res.data || []);
     } catch {
       toast.error("Failed to load bookings");
@@ -57,15 +57,11 @@ export default function NewComplaintPage() {
       toast.error("Title and description are required");
       return;
     }
-    if (!bookingId) {
-      toast.error("Please select a related booking");
-      return;
-    }
     setSubmitting(true);
     try {
       const res = await axios.post("/api/complaints", { bookingId: bookingId || undefined, category, title: title.trim(), description: description.trim() }, { headers: { Authorization: `Bearer ${token}` } });
       toast.success("Complaint filed successfully");
-      router.push(`/dashboard/student/complaints/${res.data.id}`);
+      router.push(`/dashboard/owner/complaints/${res.data.id}`);
     } catch (err: any) {
       toast.error(err?.response?.data?.error || "Failed to file complaint");
     } finally {
@@ -76,23 +72,23 @@ export default function NewComplaintPage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 py-10">
       <div className="max-w-2xl mx-auto px-4">
-        <Link href="/dashboard/student/complaints" className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 mb-6">
+        <Link href="/dashboard/owner/complaints" className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 mb-6">
           <ArrowLeft className="w-4 h-4" /> Back to Complaints
         </Link>
 
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
           <div className="p-6 border-b border-gray-100 dark:border-gray-800">
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">File a Complaint</h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Describe your issue and we will help resolve it</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Report an issue to the admin or against a student booking</p>
           </div>
 
           <form onSubmit={handleSubmit} className="p-6 space-y-5">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Related Booking *</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Related Booking (optional)</label>
               <select value={bookingId} onChange={(e) => setBookingId(e.target.value)} className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-maroon-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white">
-                <option value="">Select a booking</option>
+                <option value="">Complain to Admin (no specific booking)</option>
                 {bookings.map((b) => (
-                  <option key={b.id} value={b.id}>{b.room.title} — {b.owner?.name || "Owner"} ({b.status})</option>
+                  <option key={b.id} value={b.id}>{b.room.title} — {(b as any).student?.name || "Student"} ({b.status})</option>
                 ))}
               </select>
             </div>

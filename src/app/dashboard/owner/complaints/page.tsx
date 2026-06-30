@@ -6,7 +6,7 @@ import Link from "next/link";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useAuthStore } from "@/store/authStore";
-import { AlertTriangle, Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { AlertTriangle, Search, ChevronLeft, ChevronRight, Plus } from "lucide-react";
 
 interface Complaint {
   id: string;
@@ -28,9 +28,8 @@ const STATUS_STYLES: Record<string, string> = {
 };
 
 const CATEGORY_LABELS: Record<string, string> = {
-  NOISE: "Noise Disturbance", MAINTENANCE: "Maintenance Issue", HYGIENE: "Hygiene Problem",
-  BILLING: "Billing Dispute", SECURITY: "Security Concern", HARASSMENT: "Harassment",
-  ROOM_CONDITION: "Room Condition", OTHER: "Other",
+  MAINTENANCE: "Maintenance Issue", PAYMENT: "Payment Dispute", REFUND: "Refund Request",
+  PROPERTY_ISSUE: "Property Issue", HARASSMENT: "Harassment", FAKE_LISTING: "Fake Listing", OTHER: "Other",
 };
 
 export default function OwnerComplaintsPage() {
@@ -82,9 +81,14 @@ export default function OwnerComplaintsPage() {
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Complaints</h1>
             <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">Complaints filed against your rooms</p>
           </div>
-          <Link href="/dashboard/owner" className="inline-flex items-center rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 transition">
-            Back to Dashboard
-          </Link>
+          <div className="flex gap-2">
+            <Link href="/dashboard/owner/complaints/new" className="inline-flex items-center gap-2 rounded-full bg-maroon-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-maroon-700 transition">
+              <Plus className="w-4 h-4" /> File Complaint
+            </Link>
+            <Link href="/dashboard/owner" className="inline-flex items-center rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 transition">
+              Back to Dashboard
+            </Link>
+          </div>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
