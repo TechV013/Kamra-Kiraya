@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth, apiError, apiResponse } from "@/lib/api-helpers";
+import { signToken } from "@/lib/jwt";
 
 export async function GET(req: NextRequest) {
   const { error, user } = requireAuth(req);
@@ -22,7 +23,8 @@ export async function GET(req: NextRequest) {
     });
 
     if (!userData) return apiError("User not found", 404);
-    return apiResponse(userData);
+    const token = signToken({ userId: userData.id, email: userData.email, role: userData.role });
+    return apiResponse({ user: userData, token });
   } catch (err) {
     console.error("Get profile error:", err);
     return apiError("Internal server error", 500);
