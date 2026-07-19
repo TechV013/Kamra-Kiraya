@@ -452,8 +452,7 @@ Planned Testing
 
 **Application**
 
-> https://your-live-demo-url.com
-
+>https://student-room-booking-platform.onrender.com
 ---
 
 # 📄 Documentation
@@ -476,8 +475,7 @@ B.Tech Computer Science Engineering
 
 Amity University Rajasthan
 
-- 💼 LinkedIn: https://linkedin.com/in/your-profile
-- 💻 GitHub: https://github.com/yourusername
+- 💼 LinkedIn: https://www.linkedin.com/in/vishal-jangir-831ba0263/
 - 🌐 Portfolio: https://yourportfolio.com
 
 ---
