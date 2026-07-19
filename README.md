@@ -132,7 +132,8 @@ The project was built as my final-year engineering project and follows productio
 > Add screenshot here
 
 ```
-screenshots/homepage.png
+<img width="1675" height="970" alt="Screenshot 2026-06-18 120740" src="https://github.com/user-attachments/assets/3db8fd62-8a5a-4046-a6df-657d6cb6f258" />
+
 ```
 
 ---
