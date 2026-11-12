@@ -91,7 +91,7 @@ export async function getRecommendedRooms(userId?: string, limit = 6) {
       roomType: true,
       amenities: true,
       rating: true,
-      totalReviews: true,
+      reviewCount: true,
     },
   });
 
@@ -99,7 +99,7 @@ export async function getRecommendedRooms(userId?: string, limit = 6) {
 
   if (aiAvailable && filtered.length > 0) {
     const roomList = filtered
-      .map((r: any) => `- ${r.id}: ${r.title} (${r.city}, ₹${r.priceDaily}/day, ${r.roomType}, rating: ${r.rating}, reviews: ${r.totalReviews}, amenities: ${r.amenities.slice(0, 5).join(", ")})`)
+      .map((r: any) => `- ${r.id}: ${r.title} (${r.city}, ₹${r.priceDaily}/day, ${r.roomType}, rating: ${r.rating}, reviews: ${r.reviewCount}, amenities: ${r.amenities.slice(0, 5).join(", ")})`)
       .join("\n");
 
     const prompt = `User preferences: Cities: ${prefs.cities.join(", ") || "any"}, Budget: ₹${prefs.minBudget}-₹${prefs.maxBudget}/day, Room types: ${prefs.roomTypes.join(", ") || "any"}, Preferred amenities: ${prefs.preferredAmenities.join(", ") || "none"}
@@ -156,7 +156,7 @@ export async function getSimilarRooms(roomId: string, limit = 4) {
     },
     select: {
       id: true, title: true, city: true, priceDaily: true,
-      roomType: true, amenities: true, rating: true, totalReviews: true,
+      roomType: true, amenities: true, rating: true, reviewCount: true,
     },
     orderBy: { rating: "desc" },
     take: 10,
