@@ -3,17 +3,17 @@ services:
     name: kamra-kiraya
     runtime: node
     plan: free
-    buildCommand: npm install && npx prisma generate && npx prisma db push --skip-generate && npm run build
+    buildCommand: npm install && npx prisma generate && npx prisma migrate deploy && npm run build
     startCommand: npx next start
     envVars:
       - key: DATABASE_URL
-        value: "***REMOVED***"
+        sync: false
       - key: DIRECT_URL
-        value: "***REMOVED***"
+        sync: false
       - key: JWT_SECRET
-        value: "***REMOVED***"
+        sync: false
       - key: ADMIN_SECRET
-        value: "***REMOVED***"
+        sync: false
       - key: UPI_ID
         value: "8209184926@axl"
       - key: UPI_NAME
@@ -27,6 +27,6 @@ services:
       - key: SUPABASE_URL
         value: "https://wmfibigtcaxtedfhehcx.supabase.co"
       - key: SUPABASE_SERVICE_KEY
-        value: "***REMOVED***"
+        sync: false
       - key: NEXT_PUBLIC_APP_URL
-        value: "https://student-room-booking-platform.onrender.com"
+        value: "https://kamra-kiraya.vercel.app"
