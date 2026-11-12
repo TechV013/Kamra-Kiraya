@@ -97,7 +97,12 @@ export async function POST(req: NextRequest) {
       select: VERIFICATION_SELECT,
     });
 
-    const ownerName = user!.name || "An owner";
+    const owner = await prisma.user.findUnique({
+      where: { id: user!.userId },
+      select: { name: true },
+    });
+
+    const ownerName = owner?.name || user!.email || "An owner";
     await notifyAdmins(
       "New Verification Request",
       `${ownerName} has submitted verification documents for review.`

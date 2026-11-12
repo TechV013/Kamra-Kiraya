@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
     });
     if (!booking) return apiError("Booking not found", 404);
 
-    if (user!.role !== "ADMIN" && user!.id !== booking.studentId && user!.id !== booking.room.ownerId) {
+    if (user!.role !== "ADMIN" && user!.userId !== booking.studentId && user!.userId !== booking.room.ownerId) {
       return apiError("Forbidden", 403);
     }
 
@@ -54,14 +54,14 @@ export async function POST(req: NextRequest) {
     });
     if (!booking) return apiError("Booking not found", 404);
 
-    if (user!.role !== "ADMIN" && user!.id !== booking.studentId && user!.id !== booking.room.ownerId) {
+    if (user!.role !== "ADMIN" && user!.userId !== booking.studentId && user!.userId !== booking.room.ownerId) {
       return apiError("Forbidden", 403);
     }
 
     const message = await prisma.message.create({
       data: {
         bookingId,
-        senderId: user!.id,
+        senderId: user!.userId,
         content,
         type: type || "TEXT",
       },

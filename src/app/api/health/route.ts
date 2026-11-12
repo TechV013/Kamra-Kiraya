@@ -1,35 +1,24 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { getDatabaseHealth } from "@/lib/db-test";
 
 /**
  * GET /api/health
- * Health check endpoint that includes database connectivity
+ *
+ * Public liveness/readiness probe. Returns no counts, schema details or raw
+ * error messages.
  */
-export async function GET(req: NextRequest) {
-  try {
-    const dbHealth = await getDatabaseHealth();
+export async function GET() {
+  const database = await getDatabaseHealth();
 
-    const systemHealth = {
-      status: "ok",
-      timestamp: new Date().toISOString(),
-      uptime: process.uptime(),
-      environment: process.env.NODE_ENV || "development",
-      database: dbHealth,
-    };
-
-    const statusCode = dbHealth.status === "healthy" ? 200 : 503;
-
-    return NextResponse.json(systemHealth, { status: statusCode });
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-
-    return NextResponse.json(
-      {
-        status: "error",
-        timestamp: new Date().toISOString(),
-        error: errorMessage,
+  return NextResponse.json(
+    {
+      status: database.status === "healthy" ? "ok" : "degraded",
+      timestamp: database.timestamp,
+      database: {
+        status: database.status,
+        latency: database.latency,
       },
-      { status: 500 }
-    );
-  }
+    },
+    { status: database.status === "healthy" ? 200 : 503 }
+  );
 }

@@ -8,13 +8,17 @@ let lastCheck = 0;
 
 export async function getActiveProvider(): Promise<AIProvider> {
   const now = Date.now();
-  if (cachedProvider && now - lastCheck < 10_000) return cachedProvider;
+  if (cachedProvider && now - lastCheck < 60_000) return cachedProvider;
 
-  const oa = await ollama.isOllamaAvailable();
-  if (oa) {
-    cachedProvider = "ollama";
-    lastCheck = now;
-    return "ollama";
+  // Ollama only exists on a developer machine. On serverless (Vercel) the
+  // localhost probe can never succeed, so skip it and go straight to Gemini.
+  if (!process.env.VERCEL) {
+    const oa = await ollama.isOllamaAvailable();
+    if (oa) {
+      cachedProvider = "ollama";
+      lastCheck = now;
+      return "ollama";
+    }
   }
 
   const gm = await gemini.isGeminiAvailable();

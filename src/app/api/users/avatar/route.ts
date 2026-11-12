@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth, apiError, apiResponse } from "@/lib/api-helpers";
-import { uploadFile, deleteFile, getSignedUrlForBucket as getSignedUrl, validateFileSignature } from "@/lib/supabase-storage";
+import { uploadFile, deleteFile, validateFileSignature } from "@/lib/supabase-storage";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 const AVATAR_BUCKET = "Student room booking plateform";
@@ -37,18 +37,22 @@ export async function POST(req: NextRequest) {
     const safeExt = file.type.split("/")[1].replace(/[^a-z0-9]/gi, "").toLowerCase();
     const fileName = `avatars/${user.userId}.${safeExt}`;
 
-    const current = await prisma.user.findUnique({ where: { id: user.userId }, select: { avatar: true } });
-    if (current?.avatar) {
-      const oldPath = current.avatar.split("/sign/")[1]?.split("?")[0];
-      if (oldPath) await deleteFile(AVATAR_BUCKET, oldPath).catch(() => {});
+    const current = await prisma.user.findUnique({
+      where: { id: user.userId },
+      select: { avatar: true, avatarPath: true },
+    });
+    if (current?.avatarPath) {
+      await deleteFile(AVATAR_BUCKET, current.avatarPath).catch(() => {});
     }
 
     await uploadFile(AVATAR_BUCKET, fileName, buffer, file.type);
 
-    const signedUrl = await getSignedUrl(AVATAR_BUCKET, fileName);
+    // Store a stable, never-expiring app URL; the route resolves it to a fresh
+    // signed Supabase URL on demand. The version param busts the image cache.
+    const avatarUrl = `/api/users/avatar/${user.userId}?v=${Date.now()}`;
     const updated = await prisma.user.update({
       where: { id: user.userId },
-      data: { avatar: signedUrl },
+      data: { avatarPath: fileName, avatar: avatarUrl },
       select: { id: true, avatar: true, name: true, email: true },
     });
 
@@ -64,15 +68,19 @@ export async function DELETE(req: NextRequest) {
   if (error || !user) return error || apiError("Unauthorized", 401);
 
   try {
-    const current = await prisma.user.findUnique({ where: { id: user.userId }, select: { avatar: true } });
-    if (!current?.avatar) return apiError("No avatar to delete", 400);
+    const current = await prisma.user.findUnique({
+      where: { id: user.userId },
+      select: { avatar: true, avatarPath: true },
+    });
+    if (!current?.avatarPath && !current?.avatar) return apiError("No avatar to delete", 400);
 
-    const oldPath = current.avatar.split("/sign/")[1]?.split("?")[0];
-    if (oldPath) await deleteFile(AVATAR_BUCKET, oldPath).catch(() => {});
+    if (current.avatarPath) {
+      await deleteFile(AVATAR_BUCKET, current.avatarPath).catch(() => {});
+    }
 
     await prisma.user.update({
       where: { id: user.userId },
-      data: { avatar: null },
+      data: { avatar: null, avatarPath: null },
     });
 
     return apiResponse({ message: "Avatar removed" });

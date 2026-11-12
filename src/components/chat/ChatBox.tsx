@@ -33,24 +33,36 @@ export default function ChatBox({ bookingId, currentUserId, onRead }: ChatBoxPro
   const { token } = useAuthStore();
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const eventSourceRef = useRef<EventSource | null>(null);
 
   const scrollToBottom = useCallback(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, []);
 
-  const fetchMessages = useCallback(async () => {
+  const fetchMessages = useCallback(async (silent = false) => {
     if (!token) return;
-    setLoading(true);
+    if (!silent) setLoading(true);
     try {
       const res = await axios.get(`/api/messages?bookingId=${bookingId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setMessages(res.data.messages || []);
+      const raw = Array.isArray(res.data) ? res.data : res.data.messages || [];
+      setMessages(
+        raw.map((m: any) => ({
+          id: m.id,
+          content: m.content,
+          senderId: m.senderId ?? m.sender?.id,
+          senderName: m.sender?.name ?? m.senderName ?? "User",
+          senderAvatar: m.sender?.avatar ?? m.senderAvatar ?? undefined,
+          bookingId: m.bookingId,
+          type: m.type ?? "TEXT",
+          isRead: m.isRead ?? false,
+          createdAt: m.createdAt,
+        }))
+      );
     } catch (error) {
       console.error("Failed to fetch messages:", error);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, [bookingId, token]);
 
@@ -72,45 +84,36 @@ export default function ChatBox({ bookingId, currentUserId, onRead }: ChatBoxPro
     fetchMessages();
   }, [fetchMessages]);
 
+  // Poll instead of holding a long-lived SSE connection open: serverless
+  // functions are capped in duration, so streaming from the API was unreliable
+  // (and the stream sent an array the client could not merge).
   useEffect(() => {
     if (!token) return;
 
-    const eventSource = new EventSource(
-      `/api/messages/stream?bookingId=${bookingId}`
-    );
-    eventSourceRef.current = eventSource;
-
-    eventSource.onmessage = (event) => {
-      try {
-        const newMessage = JSON.parse(event.data) as Message;
-        setMessages((prev) => {
-          if (prev.some((m) => m.id === newMessage.id)) return prev;
-          return [...prev, newMessage];
-        });
-      } catch (error) {
-        console.error("Failed to parse SSE message:", error);
-      }
+    const poll = () => {
+      if (document.visibilityState === "visible") fetchMessages(true);
     };
 
-    eventSource.onerror = () => {
-      eventSource.close();
-    };
+    const interval = setInterval(poll, 5000);
+    document.addEventListener("visibilitychange", poll);
 
     return () => {
-      eventSource.close();
-      eventSourceRef.current = null;
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", poll);
     };
-  }, [bookingId, token]);
+  }, [fetchMessages, token]);
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages, scrollToBottom]);
+  }, [messages.length, scrollToBottom]);
 
   useEffect(() => {
     if (messages.length > 0) {
       markAsRead();
     }
-  }, [messages, markAsRead]);
+    // Only fire when the message count changes; polling replaces the array
+    // every few seconds and would otherwise re-send the request constantly.
+  }, [messages.length, markAsRead]);
 
   const sendMessage = async () => {
     if (!input.trim() || sending || !token) return;

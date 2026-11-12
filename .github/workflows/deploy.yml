@@ -1,4 +1,4 @@
-name: CI/CD — Build, Lint & Deploy
+name: CI — Build, Lint & Migrate
 
 on:
   push:
@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  NODE_VERSION: "20"
+  NODE_VERSION: "24"
 
 jobs:
   build:
@@ -44,6 +44,7 @@ jobs:
         run: npm run build
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           UPI_ID: ${{ secrets.UPI_ID }}
           UPI_NAME: ${{ secrets.UPI_NAME }}
@@ -54,13 +55,11 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
 
-      - name: Push DB schema (main only)
+      # Apply committed migrations only (never `db push`, which can drop data).
+      # Vercel handles the actual deployment via its GitHub integration.
+      - name: Apply database migrations (main only)
         if: github.ref == 'refs/heads/main'
-        run: npx prisma db push --skip-generate --accept-data-loss
+        run: npx prisma migrate deploy
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-
-      - name: Trigger Render deploy (main only)
-        if: github.ref == 'refs/heads/main'
-        run: curl -s -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}" | cat
-        continue-on-error: true
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}

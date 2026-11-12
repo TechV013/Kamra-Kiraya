@@ -1,10 +1,12 @@
 import type { NextConfig } from "next";
-import path from "node:path";
 
 // Loader path from orchids-visual-edits - use direct resolve to get the actual file
 const loaderPath = require.resolve('orchids-visual-edits/loader.js');
 
+const isDev = process.env.NODE_ENV !== "production";
+
 const nextConfig: NextConfig = {
+  poweredByHeader: false,
   async headers() {
     return [
       {
@@ -23,7 +25,10 @@ const nextConfig: NextConfig = {
             key: "Content-Security-Policy",
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
+              // 'unsafe-eval' is only required by the dev bundler
+              isDev
+                ? "script-src 'self' 'unsafe-eval' 'unsafe-inline'"
+                : "script-src 'self' 'unsafe-inline'",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "img-src 'self' data: blob: https://*.unsplash.com https://images.unsplash.com https://*.supabase.co https://*.gravatar.com",
               "font-src 'self' https://fonts.gstatic.com",
@@ -48,7 +53,6 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  outputFileTracingRoot: path.resolve(__dirname, '../../'),
   typescript: {
     ignoreBuildErrors: true,
   },

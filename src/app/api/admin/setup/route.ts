@@ -11,14 +11,18 @@ const setupSchema = z.object({
   secretKey: z.string().min(1),
 });
 
-const ADMIN_SECRET = process.env.ADMIN_SECRET || "***REMOVED***";
-
 export async function POST(req: NextRequest) {
   try {
+    const adminSecret = process.env.ADMIN_SECRET;
+    if (!adminSecret) {
+      console.error("ADMIN_SECRET is not configured; admin setup is disabled.");
+      return apiError("Admin setup is not configured", 503);
+    }
+
     const { data, errorResponse } = await validateBody(req, setupSchema);
     if (errorResponse) return errorResponse;
 
-    if (data!.secretKey !== ADMIN_SECRET) {
+    if (data!.secretKey !== adminSecret) {
       return apiError("Invalid secret key", 403);
     }
 
@@ -59,8 +63,9 @@ export async function POST(req: NextRequest) {
 export async function GET() {
   try {
     const adminCount = await prisma.user.count({ where: { role: "ADMIN" } });
-    return apiResponse({ adminExists: adminCount > 0, adminCount });
+    return apiResponse({ adminExists: adminCount > 0 });
   } catch (err) {
+    console.error("Admin setup check error:", err);
     return apiError("Internal server error", 500);
   }
 }

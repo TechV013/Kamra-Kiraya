@@ -1,15 +1,46 @@
 import nodemailer from "nodemailer";
 
-const transporter = nodemailer.createTransport({ sendmail: true });
+const SMTP_HOST = process.env.SMTP_HOST;
+const SMTP_PORT = Number(process.env.SMTP_PORT || 587);
+const SMTP_USER = process.env.SMTP_USER;
+const SMTP_PASS = process.env.SMTP_PASS;
 
-const FROM = "noreply@kamrakiraya.com";
+const FROM = process.env.SMTP_FROM || "noreply@kamrakiraya.com";
+
+let transporter: nodemailer.Transporter | null = null;
+
+function getTransporter(): nodemailer.Transporter | null {
+  if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS) return null;
+
+  if (!transporter) {
+    transporter = nodemailer.createTransport({
+      host: SMTP_HOST,
+      port: SMTP_PORT,
+      secure: SMTP_PORT === 465,
+      auth: { user: SMTP_USER, pass: SMTP_PASS },
+      connectionTimeout: 10_000,
+      greetingTimeout: 10_000,
+      socketTimeout: 15_000,
+    });
+  }
+
+  return transporter;
+}
 
 function appUrl(): string {
   return process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 }
 
 function sendMail(to: string, subject: string, html: string): Promise<boolean> {
-  return transporter
+  const mailer = getTransporter();
+  if (!mailer) {
+    console.error(
+      "Email not sent: SMTP_HOST, SMTP_USER and SMTP_PASS must be configured."
+    );
+    return Promise.resolve(false);
+  }
+
+  return mailer
     .sendMail({ from: FROM, to, subject, html })
     .then(() => true)
     .catch((err) => {

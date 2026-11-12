@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 
-const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || "fallback-key-build-only");
+const JWT_SECRET = process.env.JWT_SECRET;
 
 const PUBLIC_ROUTES = ["/", "/login", "/register", "/about", "/contact", "/browse", "/admin-setup"];
 const PUBLIC_API_ROUTES = ["/api/auth/", "/api/rooms", "/api/reviews", "/api/health", "/api/qr", "/api/admin/setup"];
@@ -14,10 +14,16 @@ function isPublicRoute(pathname: string): boolean {
 }
 
 async function verifyAuth(req: NextRequest): Promise<{ userId: string; role: string } | null> {
+  if (!JWT_SECRET) {
+    // Fail closed: an unconfigured secret must never be treated as valid auth.
+    console.error("JWT_SECRET is not configured; all protected requests will be rejected.");
+    return null;
+  }
+
   const token = req.cookies.get("token")?.value;
   if (!token) return null;
   try {
-    const { payload } = await jwtVerify(token, JWT_SECRET);
+    const { payload } = await jwtVerify(token, new TextEncoder().encode(JWT_SECRET));
     return { userId: payload.userId as string, role: payload.role as string };
   } catch {
     return null;

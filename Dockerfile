@@ -1,7 +1,7 @@
 # Use Docker BuildKit syntax
 # Multi-stage build for Next.js production
 
-FROM node:18-alpine AS builder
+FROM node:24-alpine3.21 AS builder
 WORKDIR /app
 
 # Install dependencies (including dev deps needed for build)
@@ -18,7 +18,7 @@ ENV DATABASE_URL=postgresql://placeholder:placeholder@localhost:5432/placeholder
 RUN npm run build
 
 # Production image
-FROM node:18-alpine AS runner
+FROM node:24-alpine3.21 AS runner
 ARG JWT_SECRET
 ARG DATABASE_URL
 ENV NODE_ENV=production
