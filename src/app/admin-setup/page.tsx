@@ -123,7 +123,9 @@ export default function AdminSetupPage() {
                 placeholder="Enter admin secret key"
                 className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 outline-none focus:border-maroon-500 focus:ring-1 focus:ring-maroon-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
               />
-              <p className="mt-1.5 text-xs text-gray-400">Default: ***REMOVED***</p>
+              <p className="mt-1.5 text-xs text-gray-400">
+                Use the ADMIN_SECRET configured for this deployment.
+              </p>
             </div>
             <button
               type="submit"

@@ -25,7 +25,11 @@ export async function POST(req: NextRequest) {
     const { name, email, password, role, phone, adminSecret } = data!;
 
     if (role === "ADMIN") {
-      const ADMIN_SECRET = process.env.ADMIN_SECRET || "***REMOVED***";
+      const ADMIN_SECRET = process.env.ADMIN_SECRET;
+      if (!ADMIN_SECRET) {
+        console.error("ADMIN_SECRET is not configured; admin self-registration is disabled.");
+        return apiError("Admin registration is not configured", 503);
+      }
       if (!adminSecret || adminSecret !== ADMIN_SECRET) {
         return apiError("Invalid admin secret key", 403);
       }
